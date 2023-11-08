@@ -37,7 +37,7 @@ urlpatterns =[
     path('submit_list/',views.submit_list,name="submit_list"),
     path('change_password/',views.change_password,name="change_password"),
     path('video_meet/', views.video_meet_view, name='video_meet'),
-    path('reply_to_message/', models.reply_to_message, name='reply_to_message'),
+    path('reply_to_message/',views.reply_to_message, name='reply_to_message'),
 
 
 

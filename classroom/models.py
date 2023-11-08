@@ -97,16 +97,15 @@ class MessageToTeacher(models.Model):
     def __str__(self):
         return self.message
 
-    # def save(self, *args, **kwargs):
-    #     self.message_html = misaka.html(self.message)
-    #     super().save(*args, **kwargs)
-
     def save(self, *args, **kwargs):
+        self.message_html = self.message
+        super().save(*args, **kwargs)
+
+    def save_rp(self, *args, **kwargs):
         if self.reply:
         # If there's a reply, update the message and set the reply column
-            self.message = self.reply
-            self.reply = None
-        super().save(*args, **kwargs)
+           
+            super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-created_at']
@@ -117,20 +116,9 @@ class MessageToTeacher(models.Model):
         self.save()
 
 
-def reply_to_message(request):
-    if request.method == "POST":
-        message_id = request.POST.get("message_id")
-        reply_text = request.POST.get("reply")
 
-        message = MessageToTeacher.objects.get(id=message_id)
-        message.send_reply(reply_text)
 
-   # Send a notification to the student
-        notification = Notification.objects.create(
-            message="Your teacher has replied to your message.",
-            user=self.student
-    )
-        notification.send()
+
 
 
 

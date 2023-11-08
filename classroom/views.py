@@ -20,6 +20,12 @@ from django.db.models import Q
 from django.core.mail import send_mail
 from django.shortcuts import render, HttpResponse  
 
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect
+from urllib.parse import urlencode
+from .models import Teacher, MessageToTeacher
+from .forms import MessageForm
 # For Teacher Sign Up
 def TeacherSignUp(request):
     user_type = 'teacher'
@@ -280,9 +286,11 @@ def add_notice(request):
 
 ## For student writing message to teacher.
 @login_required
-def write_message(request,pk):
+
+
+def write_message(request, pk):
     message_sent = False
-    teacher = get_object_or_404(models.Teacher,pk=pk)
+    teacher = get_object_or_404(Teacher, pk=pk)
 
     if request.method == "POST":
         form = MessageForm(request.POST)
@@ -292,9 +300,29 @@ def write_message(request,pk):
             mssg.student = request.user.Student
             mssg.save()
             message_sent = True
+
+            # Capture the current URL
+            current_url = request.get_full_path()
+            # Create a dictionary with query parameters
+            query_parameters = request.GET.dict()
+            if query_parameters:
+                current_url += "?" + urlencode(query_parameters)
+
+            # Redirect to the captured URL
+            return HttpResponseRedirect(current_url)
     else:
         form = MessageForm()
-    return render(request,'classroom/write_message.html',{'form':form,'teacher':teacher,'message_sent':message_sent})
+    
+    messages_history = teacher.messages.order_by('-created_at')[::-1]
+    print(messages_history)
+    return render(request, 'classroom/write_message.html', {
+        'form': form,
+        'teacher': teacher,
+        'message_sent': message_sent,
+        'messages': messages_history,
+    })
+
+
 
 ## For the list of all the messages teacher have received.
 @login_required
@@ -521,21 +549,32 @@ def video_meet_view(request):
     return render(request, 'classroom/video_meet.html')
 
 
+from django.shortcuts import render, redirect
+from .models import MessageToTeacher
+
+# Your other imports and views...
+
 def reply_to_message(request):
-    if request.method == 'POST':
-        # Handle the message reply logic here
-        # Extract the message ID and reply text from the POST data
-        message_id = request.POST.get('message_id')
-        reply_text = request.POST.get('reply_text')
+    if request.method == "POST":
+        message_id = request.POST.get("message_id")
+        reply_text = request.POST.get("reply_text")
+        print('hereeeee' + message_id)
+        # Retrieve the message instance from the database
+        message = MessageToTeacher.objects.get(id=message_id)
 
-        # Process the reply, update the database, etc.
+        # Set the teacher's reply and save the message
+        message.reply = reply_text
+        message.save_rp()
 
-        return HttpResponse("Reply submitted successfully")
+        # You may want to add additional logic here, such as sending notifications to the student
+
+        return redirect('classroom:messages_list', pk=message.teacher.pk)
 
     # Handle GET requests or other cases as needed
     # You can render a template or return a response
     # to show the message reply form.
 
-    return HttpResponse("Invalid request method")
+    return render(request, "classroom/messages_list.html")
+
 
 
