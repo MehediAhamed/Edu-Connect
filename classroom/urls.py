@@ -29,13 +29,26 @@ urlpatterns =[
     path('teacher/write_notice',views.add_notice,name="write_notice"),
     path('teacher/write_link',views.add_meet,name="write_link"),
     path('student/<int:pk>/class_notice',views.class_notice,name="class_notice"),
+
     path('upload_assignment/',views.upload_assignment,name="upload_assignment"),
+    path('upload_material/',views.upload_material,name="upload_material"),
+
+    
     path('class_assignment/',views.class_assignment,name="class_assignment"),
+    path('class_material/',views.class_material,name="class_material"),
+
     path('assignment_list/',views.assignment_list,name="assignment_list"),
+    path('material_list/',views.material_list,name="material_list"),
+
     path('update_assignment/<int:id>/',views.update_assignment,name="update_assignment"),
+    path('update_material/<int:id>/',views.update_material,name="update_material"),
+
     path('assignment_delete/<int:id>/',views.assignment_delete,name="assignment_delete"),
+    path('material_delete/<int:id>/',views.material_delete,name="material_delete"),
+
     path('submit_assignment/<int:id>/',views.submit_assignment,name="submit_assignment"),
     path('submit_list/',views.submit_list,name="submit_list"),
+    
     path('change_password/',views.change_password,name="change_password"),
     path('video_meet/', views.video_meet_view, name='video_meet'),
     path('reply_to_message/',views.reply_to_message, name='reply_to_message'),

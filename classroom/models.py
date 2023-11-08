@@ -175,6 +175,20 @@ class ClassAssignment(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+
+class ClassMaterial(models.Model):
+    student = models.ManyToManyField(Student,related_name='student_material')
+    teacher = models.ForeignKey(Teacher,related_name='teacher_material',on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now=True)
+    material_name = models.CharField(max_length=250)
+    material = models.FileField(upload_to='material')
+
+    def __str__(self):
+        return self.material_name
+
+    class Meta:
+        ordering = ['-created_at']
+
 class SubmitAssignment(models.Model):
     student = models.ForeignKey(Student,related_name='student_submit',on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher,related_name='teacher_submit',on_delete=models.CASCADE)

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from classroom.models import User,Teacher,Student,StudentMarks,MessageToTeacher,ClassNotice,ClassAssignment,SubmitAssignment,MeetLink
+from classroom.models import User,Teacher,Student,StudentMarks,MessageToTeacher,ClassNotice,ClassAssignment,SubmitAssignment,MeetLink,ClassMaterial
 from django.db import transaction
 from django.forms import ModelForm, Textarea
 
@@ -84,6 +84,14 @@ class AssignmentForm(forms.ModelForm):
     class Meta():
         model = ClassAssignment
         fields = ['assignment_name','assignment']
+
+
+
+## Form for uploading or updating material (teachers only)
+class MaterialForm(forms.ModelForm):
+    class Meta():
+        model = ClassMaterial
+        fields = ['material_name','material']
 
 ## Form for submitting assignment (Students only)
 class SubmitForm(forms.ModelForm):

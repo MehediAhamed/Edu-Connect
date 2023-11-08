@@ -8,13 +8,13 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
-from classroom.forms import UserForm,TeacherProfileForm,StudentProfileForm,MarksForm,MessageForm,NoticeForm,AssignmentForm,SubmitForm,TeacherProfileUpdateForm,StudentProfileUpdateForm,MeetForm
+from classroom.forms import UserForm,TeacherProfileForm,StudentProfileForm,MarksForm,MessageForm,NoticeForm,AssignmentForm,MaterialForm,SubmitForm,TeacherProfileUpdateForm,StudentProfileUpdateForm,MeetForm
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout,update_session_auth_hash
 from django.http import HttpResponseRedirect,HttpResponse
 from classroom import models
-from classroom.models import StudentsInClass,StudentMarks,ClassAssignment,SubmitAssignment,Student,Teacher,Attendance
+from classroom.models import StudentsInClass,StudentMarks,ClassAssignment,SubmitAssignment,Student,Teacher,Attendance,ClassMaterial
 from django.contrib.auth.forms import PasswordChangeForm
 from django.db.models import Q
 from django.core.mail import send_mail
@@ -453,6 +453,27 @@ def upload_assignment(request):
         form = AssignmentForm()
     return render(request,'classroom/upload_assignment.html',{'form':form,'assignment_uploaded':assignment_uploaded})
 
+
+## Teacher uploading material.
+@login_required
+def upload_material(request):
+    material_uploaded = False
+    teacher = request.user.Teacher
+    students = Student.objects.filter(user_student_name__teacher=request.user.Teacher)
+    if request.method == 'POST':
+        form = MaterialForm(request.POST, request.FILES)
+        if form.is_valid():
+            upload = form.save(commit=False)
+            upload.teacher = teacher
+            students = Student.objects.filter(user_student_name__teacher=request.user.Teacher)
+            upload.save()
+            upload.student.add(*students)
+            material_uploaded = True
+    else:
+        form = MaterialForm()
+    return render(request,'classroom/upload_material.html',{'form':form,'assignment_uploaded':material_uploaded})
+
+
 ## Students getting the list of all the assignments uploaded by their teacher.
 @login_required
 def class_assignment(request):
@@ -461,11 +482,28 @@ def class_assignment(request):
     assignment_list = [x.submitted_assignment for x in assignment]
     return render(request,'classroom/class_assignment.html',{'student':student,'assignment_list':assignment_list})
 
+
+
+## Students getting the list of all the materials uploaded by their teacher.
+@login_required
+def class_material(request):
+    student = request.user.Student
+    material = SubmitAssignment.objects.filter(student=student)
+    material_list = [x.submitted_assignment for x in material]
+    return render(request,'classroom/class_material.html',{'student':student,'material_list':material_list})
 ## List of all the assignments uploaded by the teacher himself.
 @login_required
 def assignment_list(request):
     teacher = request.user.Teacher
     return render(request,'classroom/assignment_list.html',{'teacher':teacher})
+
+
+## List of all the materials uploaded by the teacher himself.
+@login_required
+def material_list(request):
+    teacher = request.user.Teacher
+    return render(request,'classroom/material_list.html',{'teacher':teacher})
+
 
 ## For updating the assignments later.
 @login_required
@@ -485,6 +523,28 @@ def update_assignment(request,id=None):
     template = "classroom/update_assignment.html"
     return render(request, template, context)
 
+
+
+## For updating the material later.
+@login_required
+def update_material(request,id=None):
+    obj = get_object_or_404(ClassMaterial, id=id)
+    form = MaterialForm(request.POST or None, instance=obj)
+    context = {
+        "form": form
+    }
+    if form.is_valid():
+        obj = form.save(commit=False)
+        if 'material' in request.FILES:
+            obj.material = request.FILES['material']
+        obj.save()
+        messages.success(request, "Updated Material".format(obj.material_name))
+        return redirect('classroom:material_list')
+    template = "classroom/update_material.html"
+    return render(request, template, context)
+
+
+
 ## For deleting the assignment.
 @login_required
 def assignment_delete(request, id=None):
@@ -498,6 +558,25 @@ def assignment_delete(request, id=None):
     }
     template = "classroom/assignment_delete.html"
     return render(request, template, context)
+
+
+
+## For deleting the material.
+@login_required
+def material_delete(request, id=None):
+    obj = get_object_or_404(ClassMaterial, id=id)
+    if request.method == "POST":
+        obj.delete()
+        messages.success(request, "Material Removed")
+        return redirect('classroom:material_list')
+    context = {
+        "object": obj,
+    }
+    template = "classroom/material_delete.html"
+    return render(request, template, context)
+
+
+
 
 ## For students submitting their assignment.
 @login_required

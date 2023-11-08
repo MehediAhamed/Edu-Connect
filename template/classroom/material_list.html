@@ -1,0 +1,59 @@
+{% extends 'classroom/base.html' %}
+{% block content %}
+
+
+<div class="container ">
+		<div class="row">
+            <ol class="col-12 breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item active">Material list</li>
+            </ol>
+
+        </div>
+
+       <div class="section-heading">
+            <h2>Material List</h2>
+            <div class="line-dec"></div>
+
+          </div>
+
+  <div class="jumbotron">
+{% if teacher.teacher_material.count == 0 %}
+  <h2 class="text-dark text-center">No Material Uploaded Yet</h2>
+{% else %}
+ <div class="row row-content">
+            <div class="col-12 col-sm-12">
+
+ <div class="table-responsive">
+                    <table class="table table-striped">
+
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Material Name</th>
+        <th scope="col">Uploaded Date</th>
+        <th scope="col">Download</th>
+        <th scope="col">Update</th>
+        <th scope="col">Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for material in teacher.teacher_material.all %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td>{{ material.material_name }}</td>
+          <td>{{ material.created_at }}</td>
+          <td><a href="{{ material.material.url }}" class="btn btn-primary" target="_blank">Download</a></td>
+          <td><a href="{% url 'classroom:update_material' id=material.id %}" class="btn btn-primary">Update</a></td>
+          <td><a href="{% url 'classroom:material_delete' id=material.id %}" class="btn btn-danger">Delete</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+</div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
