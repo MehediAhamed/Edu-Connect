@@ -1,0 +1,69 @@
+{% extends 'classroom/base.html' %}
+{% block content %}
+
+
+     <div class="container ">
+		<div class="row">
+            <ol class="col-12 breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item active">Post meeting</li>
+            </ol>
+
+        </div>
+
+          <div class="section-heading">
+            <h2 class="">Send Meet Link</h2>
+            <div class="line-dec"></div>
+            <span class="text-muted">
+             Link will be sent to every student in your class.</span>
+
+          </div>
+
+<div class="">
+  {% if meeting_sent %}
+  <h1>Your Link is added successfully.</h1>
+  {% else %}
+<br>
+
+              <div class="row row-content align-text-center text-white ">
+	<div class="col-12 col-md-10 offset-md-1">
+             <div class="col-12">
+                <div class="card card-body  bg-secondary">
+
+                    {{ meeting.non_field_errors }}
+
+						<form  method="post" class =" " >
+						    {% csrf_token %}
+
+                 <div class="form-group row">
+                        <label for="meeting" class="col-md-2 col-form-label"> <h6>  {{ meeting.message.label_tag }} </h6></label>
+                        <div class="col-md-10">
+
+                            <textarea class="form-control" id="feedback" required name="message" placeholder="Enter Meeting Link" rows="3"></textarea>
+
+                        </div>
+
+                        
+                    </div>
+
+                 <div class="form-group row ">
+                        <div class="offset-md-2 col-md-10">
+                            <input class="btn btn-primary" type="submit"  value="Send">
+                        </div>
+                    </div>
+                </form>
+
+
+                </div>
+            </div>
+			</div>
+		</div>
+
+  {% endif %}
+</div>
+</div>
+
+
+
+{%  endblock %}
+

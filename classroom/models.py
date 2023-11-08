@@ -142,6 +142,26 @@ class ClassNotice(models.Model):
         unique_together = ['teacher','message']
 
 
+
+class MeetLink(models.Model):
+    teacher = models.ForeignKey(Teacher,related_name='teacher_meet',on_delete=models.CASCADE)
+    students = models.ManyToManyField(Student,related_name='class_meet')
+    created_at = models.DateTimeField(auto_now=True)
+    message = models.TextField()
+    message_html = models.TextField(editable=False)
+
+    def __str__(self):
+        return self.message
+
+    def save(self,*args,**kwargs):
+        self.message_html = misaka.html(self.message)
+        super().save(*args,**kwargs)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['teacher','message']
+
+
 class ClassAssignment(models.Model):
     student = models.ManyToManyField(Student,related_name='student_assignment')
     teacher = models.ForeignKey(Teacher,related_name='teacher_assignment',on_delete=models.CASCADE)

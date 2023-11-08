@@ -8,7 +8,7 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
-from classroom.forms import UserForm,TeacherProfileForm,StudentProfileForm,MarksForm,MessageForm,NoticeForm,AssignmentForm,SubmitForm,TeacherProfileUpdateForm,StudentProfileUpdateForm
+from classroom.forms import UserForm,TeacherProfileForm,StudentProfileForm,MarksForm,MessageForm,NoticeForm,AssignmentForm,SubmitForm,TeacherProfileUpdateForm,StudentProfileUpdateForm,MeetForm
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout,update_session_auth_hash
@@ -24,7 +24,7 @@ from django.shortcuts import render, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from urllib.parse import urlencode
-from .models import Teacher, MessageToTeacher
+from .models import Teacher, MessageToTeacher,MeetLink
 from .forms import MessageForm
 # For Teacher Sign Up
 def TeacherSignUp(request):
@@ -283,6 +283,27 @@ def add_notice(request):
     else:
         notice = NoticeForm()
     return render(request,'classroom/write_notice.html',{'notice':notice,'notice_sent':notice_sent})
+
+
+## For sending meet link which will be sent to all class students.
+@login_required
+def add_meet(request):
+    Link_sent = False
+    teacher = request.user.Teacher
+    students = StudentsInClass.objects.filter(teacher=teacher)
+    students_list = [x.student for x in students]
+
+    if request.method == "POST":
+        meet = MeetForm(request.POST)
+        if meet.is_valid():
+            object = meet.save(commit=False)
+            object.teacher = teacher
+            object.save()
+            object.students.add(*students_list)
+            Link_sent = True
+    else:
+        meet = MeetForm()
+    return render(request,'classroom/write_link.html',{'meeting':meet,'meeting_sent':Link_sent})
 
 ## For student writing message to teacher.
 @login_required
@@ -577,4 +598,12 @@ def reply_to_message(request):
     return render(request, "classroom/messages_list.html")
 
 
+def meeting_schedule_list(request):
+    # Retrieve meeting schedules from the database
+    meeting_schedules = MeetLink.objects.all()
 
+    context = {
+        'meeting_schedules': meeting_schedules,
+    }
+
+    return render(request, 'classroom/meeting_schedule_list.html', context)

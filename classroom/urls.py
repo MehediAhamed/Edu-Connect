@@ -27,6 +27,7 @@ urlpatterns =[
     path('student/<int:pk>/message',views.write_message,name="write_message"),
     path('teacher/<int:pk>/messages_list',views.messages_list,name="messages_list"),
     path('teacher/write_notice',views.add_notice,name="write_notice"),
+    path('teacher/write_link',views.add_meet,name="write_link"),
     path('student/<int:pk>/class_notice',views.class_notice,name="class_notice"),
     path('upload_assignment/',views.upload_assignment,name="upload_assignment"),
     path('class_assignment/',views.class_assignment,name="class_assignment"),
@@ -38,6 +39,8 @@ urlpatterns =[
     path('change_password/',views.change_password,name="change_password"),
     path('video_meet/', views.video_meet_view, name='video_meet'),
     path('reply_to_message/',views.reply_to_message, name='reply_to_message'),
+    path('meeting_schedule_list/', views.meeting_schedule_list, name='meeting_schedule_list'),
+
 
 
 

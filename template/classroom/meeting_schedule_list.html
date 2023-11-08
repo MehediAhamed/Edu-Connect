@@ -1,0 +1,48 @@
+{% extends "classroom/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <ol class="col-12 breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active">Meeting Schedules</li>
+        </ol>
+    </div>
+
+    <div class="section-heading">
+        <h2>Meeting Schedules</h2>
+        <div class="line-dec"></div>
+    </div>
+
+    {% if meeting_schedules %}
+
+    
+
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    
+                    <th scope="col">Teacher Name</th>
+                    <th scope="col">Starting Time</th>
+                    <th scope="col">Meeting Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for schedule in meeting_schedules %}
+                    <tr style="background-color: #212529;">
+                        <td style="color: white;">{{ schedule.teacher.name }}</td>
+                        <td style="color: white;">{{ schedule.created_at }}</td>
+                        <td>
+                            <a href="{{ schedule.message }}" target="_blank" class="btn btn-primary">
+                                Open Meeting
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <h1>No meeting schedules available.</h1>
+    {% endif %}
+</div>
+{% endblock %}
