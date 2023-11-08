@@ -1,0 +1,73 @@
+{% extends "classroom/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container ">
+		<div class="row">
+            <ol class="col-12 breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item active">Attendance List</li>
+            </ol>
+
+        </div>
+
+       <div class="section-heading">
+            <h2>Attendance List</h2>
+            <div class="line-dec"></div>
+
+          </div>
+
+  {% if attendance_list.count == 0 %}
+    <h1>No students in the class.</h1>
+    {% else %}
+
+      <form method='GET' action="{% url 'classroom:class_student_list' %}" >
+     <div class="input-group md-form form-sm form-2 pl-0">
+     <input class="form-control my-0 py-1" type='search' name='q' placeholder='Type Name to Search...' aria-label="Search">
+     <div class="input-group-append">
+    <button  class="input-group-text lime lighten-2 btn-outline-success " type="submit"><i class="fas fa-search text-grey" aria-hidden="true"></i></button>
+   <input type="submit" value="Cancel" class="btn btn-danger pull-right" onclick="window.location.href='{% url 'classroom:attendance_list' %}'; return false;">
+  </div>
+</div>
+  </form>
+
+
+
+
+
+<!-- <div class="table-responsive"> -->
+<table class="table table-striped">
+<thead class="thead-dark">
+<tr>
+<th scope="col"> ID </th>
+<th scope="col"> Name </th>
+<th scope="col"> Roll No </th>
+<th scope="col"> Timestamp </th>
+</tr>
+</thead>
+<tbody>
+ 
+{% for i in attendance_list %}
+<tr style="background-color: #212529;" >
+<td style="color: white;" >{{ i.attendance.id }}</td>
+<td style="color: white;" >{{ i.info }}</td>
+<td style="color: white;" >{{ i.attendance.roll_no }}</td>
+<td style="color: white;" >{{ i.attendance.timestamp }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<br>
+<!-- </div> -->
+{% endif %}
+
+
+
+
+  
+  
+  <br>
+  <br>
+</div>
+
+
+{% endblock %}

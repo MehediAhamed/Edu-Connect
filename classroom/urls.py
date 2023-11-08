@@ -1,6 +1,6 @@
 from django.urls import path
 from classroom import views
-
+from classroom import  models
 app_name = 'classroom'
 
 urlpatterns =[
@@ -22,6 +22,7 @@ urlpatterns =[
     path('students_list/',views.students_list,name="students_list"),
     path('teachers_list/',views.teachers_list,name="teachers_list"),
     path('teacher/class_students_list',views.class_students_list,name="class_student_list"),
+    path('teacher/attendance_list',views.attendance_list,name="attendance_list"),
     path('student/<int:pk>/all_marks',views.StudentAllMarksList.as_view(),name="all_marks_list"),
     path('student/<int:pk>/message',views.write_message,name="write_message"),
     path('teacher/<int:pk>/messages_list',views.messages_list,name="messages_list"),
@@ -35,4 +36,10 @@ urlpatterns =[
     path('submit_assignment/<int:id>/',views.submit_assignment,name="submit_assignment"),
     path('submit_list/',views.submit_list,name="submit_list"),
     path('change_password/',views.change_password,name="change_password"),
+    path('video_meet/', views.video_meet_view, name='video_meet'),
+    path('reply_to_message/', models.reply_to_message, name='reply_to_message'),
+
+
+
+
 ]

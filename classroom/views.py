@@ -14,10 +14,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout,update_session_auth_hash
 from django.http import HttpResponseRedirect,HttpResponse
 from classroom import models
-from classroom.models import StudentsInClass,StudentMarks,ClassAssignment,SubmitAssignment,Student,Teacher
+from classroom.models import StudentsInClass,StudentMarks,ClassAssignment,SubmitAssignment,Student,Teacher,Attendance
 from django.contrib.auth.forms import PasswordChangeForm
 from django.db.models import Q
 from django.core.mail import send_mail
+from django.shortcuts import render, HttpResponse  
 
 # For Teacher Sign Up
 def TeacherSignUp(request):
@@ -176,9 +177,46 @@ def class_students_list(request):
     template = "classroom/class_students_list.html"
     return render(request, template, context)
 
+def attendance_list(request):
+    query = request.GET.get("q", None)
+    students = StudentsInClass.objects.filter(teacher=request.user.Teacher)
+    students_list = [x.student for x in students]
+    qs = Attendance.objects.all()
+    
+    if query is not None:
+        qs = qs.filter(
+                Q(name__icontains=query)
+                )
+  
+    qs_one = []
+    qs_two = []
+    for x in qs:
+        for y in students_list:
+            if x.roll_no == y.roll_no:
+        # if x.roll_no ==
+        # if x in students_list:
+                qs_one.append(x)
+                qs_two.append(y)
+        # else:
+        #     pass
+    zipped_data = [{'attendance': attendance, 'info': info} for attendance, info in zip(qs_one, qs_two)]
+    context = {
+        "attendance_list": zipped_data,
+        # "student_info": qs_two,
+    }
+    print(zipped_data)
+    # print(qs_two)
+    template = "classroom/attendance_list.html"
+    return render(request, template, context)
+
 class ClassStudentsListView(LoginRequiredMixin,DetailView):
     model = models.Teacher
     template_name = "classroom/class_students_list.html"
+    context_object_name = "teacher"
+
+class AttendanceView(LoginRequiredMixin,DetailView):
+    model = models.Teacher
+    template_name = "classroom/attendance_list.html"
     context_object_name = "teacher"
 
 ## For Marks obtained by the student in all subjects.
@@ -263,6 +301,11 @@ def write_message(request,pk):
 def messages_list(request,pk):
     teacher = get_object_or_404(models.Teacher,pk=pk)
     return render(request,'classroom/messages_list.html',{'teacher':teacher})
+
+
+
+
+
 
 ## Student can see all notice given by their teacher.
 @login_required
@@ -465,8 +508,34 @@ def index(request):
 
 		send_mail(subject,
 		 message,
-		 'anirudha.17me010@sode-edu.in',
-		 ['ab8055shetty@gmail.com'],
+        'tawsiftashwar@iut-dhaka.edu',
+		#  'anirudha.17me010@sode-edu.in', 
+		#  ['ab8055shetty@gmail.com'],
+           ['tawsifdipto17@gmail.com'],
 		 fail_silently=False)
 	return render(request, 'classroom/index.html')
+
+
+
+def video_meet_view(request):
+    return render(request, 'classroom/video_meet.html')
+
+
+def reply_to_message(request):
+    if request.method == 'POST':
+        # Handle the message reply logic here
+        # Extract the message ID and reply text from the POST data
+        message_id = request.POST.get('message_id')
+        reply_text = request.POST.get('reply_text')
+
+        # Process the reply, update the database, etc.
+
+        return HttpResponse("Reply submitted successfully")
+
+    # Handle GET requests or other cases as needed
+    # You can render a template or return a response
+    # to show the message reply form.
+
+    return HttpResponse("Invalid request method")
+
 

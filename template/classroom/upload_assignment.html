@@ -16,14 +16,14 @@
 
           </div>
 
-<div class="jumbotron bg-dark text-white">
+<div class="jumbotron bg-secondary text-white">
   {% if assignment_uploaded %}
   <h1>Assignment is uploaded successfully.</h1>
   {% else %}
   <form enctype="multipart/form-data" method="post">
     {% csrf_token %}
     {% bootstrap_form form %}
-    <input type="submit" class="btn btn-danger" name="" value="Upload">
+    <input type="submit" class="btn btn-primary" name="" value="Upload">
   </form>
   {% endif %}
 </div>

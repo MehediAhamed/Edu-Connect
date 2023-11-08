@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.conf import settings
 import misaka
@@ -66,24 +67,74 @@ class StudentsInClass(models.Model):
     class Meta:
         unique_together = ('teacher','student')
 
+# class MessageToTeacher(models.Model):
+#     student = models.ForeignKey(Student,related_name='student',on_delete=models.CASCADE)
+#     teacher = models.ForeignKey(Teacher,related_name='messages',on_delete=models.CASCADE)
+#     created_at = models.DateTimeField(auto_now=True)
+#     message = models.TextField()
+#     message_html = models.TextField(editable=False)
+
+#     def __str__(self):
+#         return self.message
+
+#     def save(self,*args,**kwargs):
+#         self.message_html = misaka.html(self.message)
+#         super().save(*args,**kwargs)
+
+#     class Meta:
+#         ordering = ['-created_at']
+#         unique_together = ['student','message']
+
+
 class MessageToTeacher(models.Model):
     student = models.ForeignKey(Student,related_name='student',on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher,related_name='messages',on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=True)
     message = models.TextField()
     message_html = models.TextField(editable=False)
+    reply = models.TextField(blank=True, null=True)  # To store the teacher's reply
 
     def __str__(self):
         return self.message
 
-    def save(self,*args,**kwargs):
-        self.message_html = misaka.html(self.message)
-        super().save(*args,**kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.message_html = misaka.html(self.message)
+    #     super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        if self.reply:
+        # If there's a reply, update the message and set the reply column
+            self.message = self.reply
+            self.reply = None
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['-created_at']
         unique_together = ['student','message']
 
+    def send_reply(self, reply_message):
+        self.reply = reply_message
+        self.save()
+
+
+def reply_to_message(request):
+    if request.method == "POST":
+        message_id = request.POST.get("message_id")
+        reply_text = request.POST.get("reply")
+
+        message = MessageToTeacher.objects.get(id=message_id)
+        message.send_reply(reply_text)
+
+   # Send a notification to the student
+        notification = Notification.objects.create(
+            message="Your teacher has replied to your message.",
+            user=self.student
+    )
+        notification.send()
+
+
+
+    
 class ClassNotice(models.Model):
     teacher = models.ForeignKey(Teacher,related_name='teacher',on_delete=models.CASCADE)
     students = models.ManyToManyField(Student,related_name='class_notice')

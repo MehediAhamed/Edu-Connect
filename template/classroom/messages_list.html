@@ -58,10 +58,20 @@
         </div>
     </div>
   </div>
+  <div class="message-reply-form">
+    <form method="post" action="{% url 'classroom:reply_to_message' %}">
+      {% csrf_token %}
+          <input type="hidden" name="message_id" value="{{ mssg.id }}">
+          <textarea name="reply_text" placeholder="Reply to this message"></textarea>
+          <button type="submit">Reply</button>
+      </form>
+  </div>
   </div>
   <br>
   {% endfor %}
   {% endif %}
+
+                      
 </div>
 
 {% endblock %}
