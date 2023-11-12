@@ -84,7 +84,7 @@ class StudentsInClass(models.Model):
         return f"{self.student.name} in {self.subject_name} taught by {self.teacher.username}"
 
     class Meta:
-        unique_together = ('teacher', 'student')
+        unique_together = ('teacher', 'student','subject_name')
 
 class MessageToTeacher(models.Model):
     student = models.ForeignKey(Student, related_name='student', on_delete=models.CASCADE)

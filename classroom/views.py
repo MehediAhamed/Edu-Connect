@@ -172,26 +172,42 @@ def TeacherUpdateView(request,pk):
     return render(request,'classroom/teacher_update_page.html',{'profile_updated':profile_updated,'form':form})
 
 ## List of all students that teacher has added in their class.
+from django.shortcuts import render
+from django.db.models import Q
+from .models import StudentsInClass, Student
+
 def class_students_list(request):
-    query = request.GET.get("q", None)
-    students = StudentsInClass.objects.filter(teacher=request.user.Teacher)
-    students_list = [x.student for x in students]
-    qs = Student.objects.all()
-    if query is not None:
-        qs = qs.filter(
-                Q(name__icontains=query)
-                )
-    qs_one = []
-    for x in qs:
-        if x in students_list:
-            qs_one.append(x)
-        else:
-            pass
+    query = request.GET.get("q", "")
+    selected_subject = request.GET.get("subject", "")
+    teacher = request.user.Teacher
+
+    # Get subjects associated with the logged-in teacher
+    teacher_subjects = StudentsInClass.objects.filter(teacher=teacher).values_list('subject_name', flat=True).distinct()
+
+    # Get students added by the teacher for the selected subject
+    students_in_class = StudentsInClass.objects.filter(teacher=teacher)
+
+    # If a subject is selected, filter students based on the selected subject
+    if selected_subject:
+        students_in_class = students_in_class.filter(subject_name=selected_subject)
+
+    # Get the list of student IDs based on the filter criteria
+    student_ids = students_in_class.values_list('student', flat=True)
+
+    # Filter students based on the search query and those added by the teacher
+    students = Student.objects.filter(
+        Q(name__icontains=query) if query else Q(),
+        pk__in=student_ids
+    )
+
     context = {
-        "class_students_list": qs_one,
+        "class_students_list": students,
+        "teacher_subjects": teacher_subjects,
+        "selected_subject": selected_subject,
     }
     template = "classroom/class_students_list.html"
     return render(request, template, context)
+
 
 def attendance_list(request):
     query = request.GET.get("q", None)
@@ -382,94 +398,69 @@ def student_marks_list(request,pk):
     given_marks = StudentMarks.objects.filter(teacher=teacher,student=student)
     return render(request,'classroom/student_marks_list.html',{'student':student,'given_marks':given_marks})
 
-## To add student in the class.
-from django.core.cache import cache
+## To add student in the class.from django.contrib import messages
+from django import forms
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
+from django.shortcuts import get_object_or_404, redirect
+from django.views import generic
+from .models import Student, StudentsInClass
 
-class add_student(generic.RedirectView):
+class AddStudentForm(forms.Form):
+    subject_name = forms.CharField(max_length=255)
+
+class add_student(LoginRequiredMixin, generic.RedirectView):
+    form_class = AddStudentForm
 
     def get_redirect_url(self, *args, **kwargs):
         return reverse('classroom:students_list')
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         student = get_object_or_404(Student, pk=self.kwargs.get('pk'))
+        form = self.form_class(request.POST)
 
-        # Retrieve the current subject name from the cache
-        current_subject_name = cache.get('selected_classroom_id', '')
+        if form.is_valid():
+            subject_name = form.cleaned_data['subject_name']
 
-        try:
-            # Try to add the student to the class
-            StudentsInClass.objects.create(
-                teacher=self.request.user.teacher,
-                student=student,
-                subject_name=current_subject_name
-            )
-        except:
-            messages.warning(request, 'Warning, Student already in class!')
+            try:
+                StudentsInClass.objects.create(
+                    teacher=self.request.user.Teacher,
+                    student=student,
+                    subject_name=subject_name
+                )
+                messages.success(request, '{} successfully added to {}!'.format(student.name, subject_name))
+            except:
+                messages.warning(request, 'Warning, Student already in class for {}!'.format(subject_name))
         else:
-            messages.success(request, '{} successfully added to {}!'.format(student.name, current_subject_name))
+            messages.warning(request, 'Invalid form data. Please provide a subject name.')
 
         return super().get(request, *args, **kwargs)
-    def get_redirect_url(self, *args, **kwargs):
-        return reverse('classroom:students_list')
 
-    def get(self, request, *args, **kwargs):
-        student = get_object_or_404(models.Student, pk=self.kwargs.get('pk'))
-
-        # Retrieve the current subject name from the cache
-        current_subject_name = cache.get('selected_classroom_id', '')
-
-        try:
-            # Try to get an existing record first
-            existing_record = StudentsInClass.objects.get(
-                teacher=self.request.user.Teacher,
-                student=student,
-                subject_name=current_subject_name
-            )
-
-            # If the record already exists, show a warning
-            messages.warning(self.request, 'Warning, {} is already in {}!'.format(student.name, current_subject_name))
-
-        except ObjectDoesNotExist:
-            # If the record doesn't exist, create a new one
-            StudentsInClass.objects.create(
-                teacher=self.request.user.Teacher,
-                student=student,
-                subject_name=current_subject_name
-            )
-
-            messages.success(self.request, '{} successfully added to {}!'.format(student.name, current_subject_name))
-
-        return super().get(request, *args, **kwargs)
 
 
 @login_required
 def student_added(request):
     return render(request,'classroom/student_added.html',{})
 
-## List of students which are not added by teacher in their class.
+# List of students which are not added by teacher in their class.
+from .models import Classroom
+
 def students_list(request):
-    query = request.GET.get("q", None)
-    students = StudentsInClass.objects.filter(teacher=request.user.Teacher)
-    students_list = [x.student for x in students]
-    qs = Student.objects.all()
-    if query is not None:
-        qs = qs.filter(
-                Q(name__icontains=query)
-                )
-    qs_one = []
-    for x in qs:
-        if x in students_list:
-            pass
-        else:
-            qs_one.append(x)
+    query = request.GET.get('q')
+    if query:
+        students = Student.objects.filter(name__icontains=query)
+    else:
+        students = Student.objects.all()
+
+    classrooms = Classroom.objects.all()  # Fetch all classrooms
+    subjects = classrooms.values_list('subject_name', flat=True).distinct()
 
     context = {
-        "students_list": qs_one,
+        'students_list': students,
+        'query': query,
+        'subjects': subjects,
     }
-    template = "classroom/students_list.html"
-    return render(request, template, context)
+    return render(request, 'classroom/students_list.html', context)
 
 ## List of all the teacher present in the portal.
 def teachers_list(request):
@@ -535,7 +526,6 @@ def upload_assignment(request):
             upload.student.add(*students)
 
             assignment_uploaded = True
-            messages.success(request, 'Assignment uploaded successfully.')
     else:
         form = AssignmentForm()
 
