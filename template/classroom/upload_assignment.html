@@ -1,29 +1,30 @@
 {% extends 'classroom/base.html' %}
 {% load bootstrap4 cache %}
 {% block content %}
-<div class="container ">
-    <!-- ... your existing content ... -->
-    <div class="jumbotron bg-secondary text-white">
+<div class="container" style="width: 50%;">
+    <br>
+    <br>
+    <div class="jumbotron bg-secondary text-white" >
         {% if assignment_uploaded %}
-        <h1>Assignment is uploaded successfully.</h1>
+       
+        <h1 class="text-center" style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Assignment is uploaded successfully.</h1>
         {% else %}
-        <form enctype="multipart/form-data" method="post">
+        <form enctype="multipart/form-data" method="post" style="width: 50%; margin-left: 25%;">
             {% csrf_token %}
             {% bootstrap_form form %}
             
-            <!-- Add the subject name dropdown directly into the form -->
             <div class="form-group">
                 <label for="classroom_select">Select Classroom:</label>
-                <select class="form-control" name="classroom_select" id="classroom_select">
+                <select class="form-control" name="classroom_select" id="classroom_select" style="width: 90%;" required>
                     {% for classroom in created_classrooms %}
-                        <option value="{{ classroom.id }}">{{ classroom.subject_name }}</option>
+                        <option value="{{ classroom.id }}" >{{ classroom.subject_name }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="{{ form.deadline.id_for_label }}">Deadline:</label>
-                <input type="datetime-local" class="form-control" name="deadline" required>
+                <input type="datetime-local" class="form-control" name="deadline" required style="width: 90%;">
             </div>
           
             

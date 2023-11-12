@@ -15,8 +15,8 @@
         <div class="jumbotron">
             {% regroup assignments by subject as assignment_list_by_subject %}
             {% for group in assignment_list_by_subject %}
-                <h2 class="text-dark text-center">Subject: {{ group.grouper }}</h2>
-                <div class="row row-content">
+            <h2 class="text-center" style="font-size: 30px; color: rgb(139, 67, 0); font-family: 'Comic Sans MS', cursive;">Subject: {{ group.grouper }}</h2>
+            <div class="row row-content">
                     <div class="col-12 col-sm-12">
                         <div class="table-responsive">
                             <table class="table table-striped">

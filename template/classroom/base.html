@@ -48,16 +48,17 @@
          
 
            <li class="nav-item dropdown active">
-            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-book"></i> Create Class</a>
+            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-plus"></i>
+              Dashboard</a>
             <div class="dropdown-menu text-center" aria-labelledby="dropdown01">
-            
-            <a class="dropdown-item" href="{% url 'classroom:create_classroom' %}"><i class="fa fa-user-edit"></i> Create Classroom</a>
-           <a class="dropdown-item" href="{% url 'classroom:teacher_detail' pk=user.pk %}"><i class="fa fa-user-circle"></i> Profile</a>
+              <a class="dropdown-item" href="{% url 'classroom:teacher_detail' pk=user.pk %}"><i class="fa fa-user-circle"></i> Profile</a>
+
+            <a class="dropdown-item" href="{% url 'classroom:create_classroom' %}"><i class="fas fa-chalkboard"></i> Create Classroom</a>
             </div
           </li>
 
          <li class="nav-item dropdown active">
-            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-book"></i> Assignments</a>
+            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-tasks"></i>  Assignments</a>
             <div class="dropdown-menu text-center" aria-labelledby="dropdown01">
             <a class="dropdown-item" href="{% url 'classroom:upload_assignment' %}">Upload Assignment</a>
           <a class="dropdown-item" href="{% url 'classroom:assignment_list' %}">Assignment list</a>
@@ -86,7 +87,8 @@
           </li>
 
           <li class="nav-item dropdown active">
-            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-graduation-cap"></i> Meet</a>
+            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-video"></i>
+              Meet</a>
                     <div class="dropdown-menu text-center" aria-labelledby="dropdown01">
                 <a class="dropdown-item" href="{% url 'classroom:video_meet' %}"  target="_blank">Create Meet Link</a>
                   <a class="dropdown-item" href="{% url 'classroom:write_link' %}">Send Meet Link</a>
@@ -95,14 +97,15 @@
                     </div>
                   </li>
      
-           <li class="nav-item active">
-           <a class="nav-link" href="{% url 'classroom:write_notice' %}"><i class="fa fa-envelope"></i> Post Notice</a>
-          </li>
 
-           <li class="nav-item active">
-           <a class="nav-link" href="{% url 'classroom:messages_list' pk=user.pk %}"><i class="fa fa-inbox"></i> Inbox</a>
-          </li>
-
+                  <li class="nav-item dropdown active">
+                    <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-graduation-cap"></i> Others</a>
+                            <div class="dropdown-menu text-center" aria-labelledby="dropdown01">
+                              <a class="dropdown-item" href="{% url 'classroom:write_notice' %}"><i class="fa fa-envelope"></i> Post Notice</a>
+                              <a class="dropdown-item" href="{% url 'classroom:messages_list' pk=user.pk %}"><i class="fa fa-inbox"></i> Inbox</a>
+                            </div>
+                          </li>
+   
     {% else %}
 
             <li class="nav-item active">
@@ -114,7 +117,7 @@
           </li>
 
             <li class="nav-item active">
-          <a class="nav-link" href="{% url 'classroom:class_assignment' %}"><i class="fa fa-book"></i> Assignments</a>
+          <a class="nav-link" href="{% url 'classroom:class_assignment' %}"><i class="fa fa-tasks"></i> Assignments</a>
           </li>
           <li class="nav-item active">
             <a class="nav-link" href="{% url 'classroom:class_material' %}"><i class="fa fa-book"></i> Materials</a>
