@@ -19,13 +19,23 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.db.models import Q
 from django.core.mail import send_mail
 from django.shortcuts import render, HttpResponse  
+from django.core.cache import cache
 
 
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from urllib.parse import urlencode
-from .models import Teacher, MessageToTeacher,MeetLink
-from .forms import MessageForm
+from .models import Classroom, Teacher, MessageToTeacher,MeetLink
+from .forms import ClassroomCreationForm, MessageForm
+
+
+
+from django.contrib.auth.decorators import login_required
+from functools import wraps
+from django.http import HttpResponseForbidden
+
+
+
 # For Teacher Sign Up
 def TeacherSignUp(request):
     user_type = 'teacher'
@@ -233,7 +243,7 @@ class StudentAllMarksList(LoginRequiredMixin,DetailView):
 
 ## To give marks to a student.
 @login_required
-def add_marks(request,pk):
+def add_marks(request,pk,subject):
     marks_given = False
     student = get_object_or_404(models.Student,pk=pk)
     if request.method == "POST":
@@ -242,12 +252,13 @@ def add_marks(request,pk):
             marks = form.save(commit=False)
             marks.student = student
             marks.teacher = request.user.Teacher
+            marks.subject_name=subject
             marks.save()
             messages.success(request,'Marks uploaded successfully!')
             return redirect('classroom:submit_list')
     else:
         form = MarksForm()
-    return render(request,'classroom/add_marks.html',{'form':form,'student':student,'marks_given':marks_given})
+    return render(request,'classroom/add_marks.html',{'form':form,'student':student,'marks_given':marks_given, 'subject': subject})
 
 ## For updating marks.
 @login_required
@@ -372,22 +383,66 @@ def student_marks_list(request,pk):
     return render(request,'classroom/student_marks_list.html',{'student':student,'given_marks':given_marks})
 
 ## To add student in the class.
-class add_student(LoginRequiredMixin,generic.RedirectView):
+from django.core.cache import cache
+from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 
-    def get_redirect_url(self,*args,**kwargs):
+class add_student(generic.RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
         return reverse('classroom:students_list')
 
-    def get(self,request,*args,**kwargs):
-        student = get_object_or_404(models.Student,pk=self.kwargs.get('pk'))
+    def get(self, request, *args, **kwargs):
+        student = get_object_or_404(Student, pk=self.kwargs.get('pk'))
+
+        # Retrieve the current subject name from the cache
+        current_subject_name = cache.get('selected_classroom_id', '')
 
         try:
-            StudentsInClass.objects.create(teacher=self.request.user.Teacher,student=student)
+            # Try to add the student to the class
+            StudentsInClass.objects.create(
+                teacher=self.request.user.teacher,
+                student=student,
+                subject_name=current_subject_name
+            )
         except:
-            messages.warning(self.request,'warning, Student already in class!')
+            messages.warning(request, 'Warning, Student already in class!')
         else:
-            messages.success(self.request,'{} successfully added!'.format(student.name))
+            messages.success(request, '{} successfully added to {}!'.format(student.name, current_subject_name))
 
-        return super().get(request,*args,**kwargs)
+        return super().get(request, *args, **kwargs)
+    def get_redirect_url(self, *args, **kwargs):
+        return reverse('classroom:students_list')
+
+    def get(self, request, *args, **kwargs):
+        student = get_object_or_404(models.Student, pk=self.kwargs.get('pk'))
+
+        # Retrieve the current subject name from the cache
+        current_subject_name = cache.get('selected_classroom_id', '')
+
+        try:
+            # Try to get an existing record first
+            existing_record = StudentsInClass.objects.get(
+                teacher=self.request.user.Teacher,
+                student=student,
+                subject_name=current_subject_name
+            )
+
+            # If the record already exists, show a warning
+            messages.warning(self.request, 'Warning, {} is already in {}!'.format(student.name, current_subject_name))
+
+        except ObjectDoesNotExist:
+            # If the record doesn't exist, create a new one
+            StudentsInClass.objects.create(
+                teacher=self.request.user.Teacher,
+                student=student,
+                subject_name=current_subject_name
+            )
+
+            messages.success(self.request, '{} successfully added to {}!'.format(student.name, current_subject_name))
+
+        return super().get(request, *args, **kwargs)
+
 
 @login_required
 def student_added(request):
@@ -432,29 +487,61 @@ def teachers_list(request):
     return render(request, template, context)
 
 
-####################################################
 
-## Teacher uploading assignment.
+
+from django.core.cache import cache
+from django.db import transaction
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
+from django.core.cache import cache
+from django.db import transaction
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
+@transaction.atomic
 @login_required
 def upload_assignment(request):
     assignment_uploaded = False
     teacher = request.user.Teacher
     students = Student.objects.filter(user_student_name__teacher=request.user.Teacher)
+
+    created_classrooms = teacher.created_classrooms.all()
+
     if request.method == 'POST':
         form = AssignmentForm(request.POST, request.FILES)
         if form.is_valid():
             upload = form.save(commit=False)
             upload.teacher = teacher
-            students = Student.objects.filter(user_student_name__teacher=request.user.Teacher)
+            upload.deadline = request.POST['deadline']  # Assuming 'deadline' is the name attribute in your form
+
+            # Retrieve the subject_id from the form data
+            subject_id = request.POST.get('classroom_select')
+
+            # Retrieve the subject name from the Classroom table
+            try:
+                selected_classroom = Classroom.objects.get(id=subject_id)
+                subject_name = selected_classroom.subject_name
+            except Classroom.DoesNotExist:
+                subject_name = ''
+
+            # Assign the subject to the form's subject field
+            upload.subject = subject_name
+            print(subject_name)
+            # Save the assignment
             upload.save()
+
+            # Add students to the assignment
             upload.student.add(*students)
+
             assignment_uploaded = True
+            messages.success(request, 'Assignment uploaded successfully.')
     else:
         form = AssignmentForm()
-    return render(request,'classroom/upload_assignment.html',{'form':form,'assignment_uploaded':assignment_uploaded})
 
+    return render(request, 'classroom/upload_assignment.html', {'form': form, 'assignment_uploaded': assignment_uploaded, 'created_classrooms': created_classrooms})
 
-## Teacher uploading material.
+#material upload
 @login_required
 def upload_material(request):
     material_uploaded = False
@@ -475,12 +562,24 @@ def upload_material(request):
 
 
 ## Students getting the list of all the assignments uploaded by their teacher.
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import SubmitAssignment
+
 @login_required
 def class_assignment(request):
     student = request.user.Student
-    assignment = SubmitAssignment.objects.filter(student=student)
-    assignment_list = [x.submitted_assignment for x in assignment]
-    return render(request,'classroom/class_assignment.html',{'student':student,'assignment_list':assignment_list})
+    assignments = student.student_assignment.all().order_by('subject', 'deadline')
+    
+    submitted_assignments = [x.submitted_assignment for x in SubmitAssignment.objects.filter(student=student)]
+
+    return render(request, 'classroom/class_assignment.html', {
+    'student': student,
+    'assignments': assignments,
+    'submitted_assignments': submitted_assignments,
+})
+
+
 
 
 
@@ -517,8 +616,11 @@ def update_assignment(request,id=None):
         obj = form.save(commit=False)
         if 'assignment' in request.FILES:
             obj.assignment = request.FILES['assignment']
+        new_deadline = request.POST['new_deadline']
+        if new_deadline:
+            obj.deadline = new_deadline
+
         obj.save()
-        messages.success(request, "Updated Assignment".format(obj.assignment_name))
         return redirect('classroom:assignment_list')
     template = "classroom/update_assignment.html"
     return render(request, template, context)
@@ -538,7 +640,6 @@ def update_material(request,id=None):
         if 'material' in request.FILES:
             obj.material = request.FILES['material']
         obj.save()
-        messages.success(request, "Updated Material".format(obj.material_name))
         return redirect('classroom:material_list')
     template = "classroom/update_material.html"
     return render(request, template, context)
@@ -551,7 +652,6 @@ def assignment_delete(request, id=None):
     obj = get_object_or_404(ClassAssignment, id=id)
     if request.method == "POST":
         obj.delete()
-        messages.success(request, "Assignment Removed")
         return redirect('classroom:assignment_list')
     context = {
         "object": obj,
@@ -567,7 +667,6 @@ def material_delete(request, id=None):
     obj = get_object_or_404(ClassMaterial, id=id)
     if request.method == "POST":
         obj.delete()
-        messages.success(request, "Material Removed")
         return redirect('classroom:material_list')
     context = {
         "object": obj,
@@ -598,10 +697,19 @@ def submit_assignment(request, id=None):
     return render(request,'classroom/submit_assignment.html',{'form':form,})
 
 ## To see all the submissions done by the students.
+from django.shortcuts import render
+from .models import SubmitAssignment
+
 @login_required
 def submit_list(request):
     teacher = request.user.Teacher
-    return render(request,'classroom/submit_list.html',{'teacher':teacher})
+
+    # Get the subjects related to the submitted assignments
+    submitted_assignments = SubmitAssignment.objects.filter(teacher=teacher)
+    subjects = submitted_assignments.values_list('submitted_assignment__subject', flat=True).distinct()
+
+    return render(request, 'classroom/submit_list.html', {'teacher': teacher, 'subjects': subjects})
+
 
 ##################################################################################################
 
@@ -686,3 +794,70 @@ def meeting_schedule_list(request):
     }
 
     return render(request, 'classroom/meeting_schedule_list.html', context)
+
+
+
+def teacher_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        # Check if the user is authenticated and associated with a teacher
+        print(f"User: {request.user}")
+        print(f"Is Authenticated: {request.user.is_authenticated}")
+        print(f"Has Teacher Attribute: {hasattr(request.user, 'teacher')}")
+        
+        if request.user.is_authenticated and hasattr(request.user, 'teacher'):
+            return view_func(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden("You don't have permission to access this page.")
+
+    return _wrapped_view
+
+
+@login_required
+
+def create_classroom(request):
+    print("Entering create_classroom view")  # Check if the view is being accessed
+    if request.method == 'POST':
+        form = ClassroomCreationForm(request.POST)
+        if form.is_valid():
+            # Save the classroom and associate it with the teacher
+            print("Form is valid")
+            classroom = form.save(commit=False)
+
+            # Query the Teacher model based on the current user
+            teacher = Teacher.objects.get(user=request.user)
+
+            classroom.teacher = teacher
+            classroom.save()
+            teacher.created_classrooms.add(classroom)
+            print("Classroom saved successfully")
+            return render(request,'classroom/base.html')
+        else:
+            print(form.errors)  # Print form errors to the console
+    else:
+        form = ClassroomCreationForm()
+
+    return render(request, 'classroom/create_classroom.html', {'form': form})
+
+@login_required
+
+# views.py
+@login_required
+def select_classroom(request):
+    # Retrieve the teacher based on the current user
+    teacher = Teacher.objects.get(user=request.user)
+    
+    # Get the classrooms created by the teacher
+    created_classrooms = teacher.created_classrooms.all()
+
+    if request.method == 'POST':
+        # Get the selected classroom ID from the form
+        selected_classroom_id = request.POST.get('classroom_select')
+
+        # Save the selected classroom ID in the cache
+        cache.set('selected_classroom_id', selected_classroom_id)
+
+        # Redirect to the selected classroom's detail view or any other desired page
+        return render(request, 'classroom/base.html')
+
+    return render(request, 'classroom/select_classroom.html', {'created_classrooms': created_classrooms})

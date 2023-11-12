@@ -31,7 +31,9 @@
       <tr>
         <th scope="col">#</th>
         <th scope="col">Assignment Name</th>
+        <th scope="col">Subject</th>
         <th scope="col">Uploaded Date</th>
+        <th scope="col">Deadline</th>
         <th scope="col">Download</th>
         <th scope="col">Update</th>
         <th scope="col">Delete</th>
@@ -42,7 +44,9 @@
         <tr>
           <th scope="row">{{ forloop.counter }}</th>
           <td>{{ assignment.assignment_name }}</td>
+          <td>{{ assignment.subject }}</td>
           <td>{{ assignment.created_at }}</td>
+          <td>{{ assignment.deadline }}</td>
           <td><a href="{{ assignment.assignment.url }}" class="btn btn-primary" target="_blank">Download</a></td>
           <td><a href="{% url 'classroom:update_assignment' id=assignment.id %}" class="btn btn-primary">Update</a></td>
           <td><a href="{% url 'classroom:assignment_delete' id=assignment.id %}" class="btn btn-danger">Delete</a></td>

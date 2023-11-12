@@ -45,10 +45,16 @@
         {% if user.is_authenticated %}
         {% if user.is_teacher%}
 
-          <li class="nav-item active">
-         <a class="nav-link" href="{% url 'classroom:teacher_detail' pk=user.pk %}"><i class="fa fa-user-circle"></i> Profile</a>
-          </li>
+         
 
+           <li class="nav-item dropdown active">
+            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-book"></i> Create Class</a>
+            <div class="dropdown-menu text-center" aria-labelledby="dropdown01">
+            
+            <a class="dropdown-item" href="{% url 'classroom:create_classroom' %}"><i class="fa fa-user-edit"></i> Create Classroom</a>
+           <a class="dropdown-item" href="{% url 'classroom:teacher_detail' pk=user.pk %}"><i class="fa fa-user-circle"></i> Profile</a>
+            </div
+          </li>
 
          <li class="nav-item dropdown active">
             <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-book"></i> Assignments</a>

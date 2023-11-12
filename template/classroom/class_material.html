@@ -5,21 +5,21 @@
 		<div class="row">
             <ol class="col-12 breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                <li class="breadcrumb-item active">Assignment</li>
+                <li class="breadcrumb-item active">material</li>
             </ol>
 
         </div>
 
        <div class="section-heading">
-            <h2>Assignment</h2>
+            <h2>material</h2>
             <div class="line-dec"></div>
 
           </div>
 
   <div class="jumbotron ">
 
-{% if student.student_assignment.count == 0 %}
-  <h2 class="text-dark text-center">No assignments Yet</h2>
+{% if student.student_material.count == 0 %}
+  <h2 class="text-dark text-center">No materials Yet</h2>
 {% else %}
 
         <div class="row row-content">
@@ -30,20 +30,20 @@
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
-        <th scope="col">Assignment Name</th>
+        <th scope="col">material Name</th>
         <th scope="col">Uploaded By</th>
         <th scope="col">Uploaded Date</th>
         <th scope="col">Download</th>
       </tr>
     </thead>
     <tbody>
-      {% for assignment in student.student_assignment.all %}
+      {% for material in student.student_material.all %}
         <tr>
           <th scope="row">{{ forloop.counter }}</th>
-          <td>{{ assignment.assignment_name }}</td>
-          <td>{{ assignment.teacher }}</td>
-          <td>{{ assignment.created_at }}</td>
-          <td><a href="{{ assignment.assignment.url }}" class="btn btn-primary" target="_blank">Download</a></td>
+          <td>{{ material.material_name }}</td>
+          <td>{{ material.teacher }}</td>
+          <td>{{ material.created_at }}</td>
+          <td><a href="{{ material.material.url }}" class="btn btn-primary" target="_blank">Download</a></td>
          
         </tr>
       {% endfor %}

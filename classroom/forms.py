@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from classroom.models import User,Teacher,Student,StudentMarks,MessageToTeacher,ClassNotice,ClassAssignment,SubmitAssignment,MeetLink,ClassMaterial
+from classroom.models import Classroom, User,Teacher,Student,StudentMarks,MessageToTeacher,ClassNotice,ClassAssignment,SubmitAssignment,MeetLink,ClassMaterial
 from django.db import transaction
 from django.forms import ModelForm, Textarea
 
@@ -56,7 +56,7 @@ class StudentProfileUpdateForm(forms.ModelForm):
 class MarksForm(forms.ModelForm):
     class Meta():
         model = StudentMarks
-        fields = ['subject_name','marks_obtained','maximum_marks']
+        fields = ['marks_obtained','maximum_marks']
 
 ## Writing message to teacher
 class MessageForm(forms.ModelForm):
@@ -93,8 +93,21 @@ class MaterialForm(forms.ModelForm):
         model = ClassMaterial
         fields = ['material_name','material']
 
+
 ## Form for submitting assignment (Students only)
 class SubmitForm(forms.ModelForm):
     class Meta():
         model = SubmitAssignment
         fields = ['submit']
+
+
+
+
+class ClassroomCreationForm(forms.ModelForm):
+    class Meta:
+        model = Classroom
+        fields = ['subject_name', 'subject_code']
+        widgets = {
+            'subject_name': Textarea(attrs={'cols': 10, 'rows': 1}),
+            'subject_code': Textarea(attrs={'cols': 10, 'rows': 1}),
+        }

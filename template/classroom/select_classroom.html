@@ -1,0 +1,29 @@
+{% extends 'classroom/base.html' %}
+
+{% block content %}
+  <div class="container">
+    <div class="row justify-content-center mt-5">
+      <div class="col-md-6">
+        <div class="card p-4" style="background-color: #6a6a6a;">
+          <h2 class="text-center mb-4">Select Classroom</h2>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+              <label for="classroom_select">Select Classroom:</label>
+              <select class="form-control" name="classroom_select" id="classroom_select">
+                {% for classroom in created_classrooms %}
+                  <option value="{{ classroom.id }}">{{ classroom.subject_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">Select Classroom</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

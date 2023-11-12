@@ -1,0 +1,30 @@
+{% extends 'classroom/base.html' %}
+
+{% block content %}
+  <div class="container">
+    <div class="row justify-content-center mt-5">
+      <div class="col-md-6">
+        <div class="card p-4" style="background-color: #6a6a6a;">
+          <h2 class="text-center mb-4">Create Classroom</h2>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+              <label for="{{ form.subject_name.id_for_label }}">Subject Name:</label>
+              <textarea class="form-control" rows="1" placeholder="RDBMS" name="{{ form.subject_name.name }}"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.subject_code.id_for_label }}">Subject Code:</label>
+              <textarea class="form-control" rows="1"  placeholder="CSE 4508" name="{{ form.subject_code.name }}"></textarea>
+            </div>
+            
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">Create Classroom</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,63 +1,62 @@
 {% extends 'classroom/base.html' %}
 {% block content %}
 
-<div class="container ">
-		<div class="row">
-            <ol class="col-12 breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                <li class="breadcrumb-item active">Assignment</li>
-            </ol>
+<div class="container">
+    <div class="row">
+        <ol class="col-12 breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active">Assignment</li>
+        </ol>
+    </div>
 
+    {% if student.student_assignment.count == 0 %}
+        <h2 class="text-dark text-center">No assignments Yet</h2>
+    {% else %}
+        <div class="jumbotron">
+            {% regroup assignments by subject as assignment_list_by_subject %}
+            {% for group in assignment_list_by_subject %}
+                <h2 class="text-dark text-center">Subject: {{ group.grouper }}</h2>
+                <div class="row row-content">
+                    <div class="col-12 col-sm-12">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Assignment Name</th>
+                                        <th scope="col">Uploaded By</th>
+                                        <th scope="col">Uploaded Date</th>
+                                        <th scope="col">Deadline</th>
+                                        <th scope="col">Download</th>
+                                        <th scope="col">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in group.list %}
+                                        <tr>
+                                            <th scope="row">{{ forloop.counter }}</th>
+                                            <td>{{ assignment.assignment_name }}</td>
+                                            <td>{{ assignment.teacher }}</td>
+                                            <td>{{ assignment.created_at }}</td>
+                                            <td>{{ assignment.deadline }}</td>
+                                            <td><a href="{{ assignment.assignment.url }}" class="btn btn-primary" target="_blank">Download</a></td>
+                                            {% if assignment.deadline < now %}
+                                                <td>Deadline Passed</td>
+                                            {% elif assignment in submitted_assignments %}
+                                                <td>Submitted</td>
+                                            {% else %}
+                                                <td><a href="{% url 'classroom:submit_assignment' id=assignment.id %}" class="btn btn-primary">Submit</a></td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-
-       <div class="section-heading">
-            <h2>Assignment</h2>
-            <div class="line-dec"></div>
-
-          </div>
-
-  <div class="jumbotron ">
-
-{% if student.student_assignment.count == 0 %}
-  <h2 class="text-dark text-center">No assignments Yet</h2>
-{% else %}
-
-        <div class="row row-content">
-            <div class="col-12 col-sm-12">
-
- <div class="table-responsive">
-                    <table class="table table-striped">
-    <thead class="thead-dark">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Assignment Name</th>
-        <th scope="col">Uploaded By</th>
-        <th scope="col">Uploaded Date</th>
-        <th scope="col">Download</th>
-        <th scope="col">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for assignment in student.student_assignment.all %}
-        <tr>
-          <th scope="row">{{ forloop.counter }}</th>
-          <td>{{ assignment.assignment_name }}</td>
-          <td>{{ assignment.teacher }}</td>
-          <td>{{ assignment.created_at }}</td>
-          <td><a href="{{ assignment.assignment.url }}" class="btn btn-primary" target="_blank">Download</a></td>
-          {% if assignment in assignment_list %}
-            <td>Submitted</td>
-          {% else %}
-            <td><a href="{% url 'classroom:submit_assignment' id=assignment.id %}" class="btn btn-primary">Submit</a></td>
-          {% endif %}
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  </div>
-  </div>
-  </div>
-{% endif %}
+    {% endif %}
 </div>
-</div>
+
 {% endblock %}

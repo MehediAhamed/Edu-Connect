@@ -23,7 +23,7 @@
   {% if marks_given %}
   <h1>Marks added successfully.</h1>
   {% else %}
-
+  <p>Subject name : {{subject}}</p>
   <form method="post">
     {% csrf_token %}
     {% bootstrap_form form %}

@@ -14,7 +14,7 @@ urlpatterns =[
     path('teacher/<int:pk>/',views.TeacherDetailView.as_view(),name="teacher_detail"),
     path('update/student/<int:pk>/',views.StudentUpdateView,name="student_update"),
     path('update/teacher/<int:pk>/',views.TeacherUpdateView,name="teacher_update"),
-    path('student/<int:pk>/enter_marks',views.add_marks,name="enter_marks"),
+    path('student/<int:pk>/<str:subject>/enter_marks',views.add_marks,name="enter_marks"),
     path('student/<int:pk>/marks_list',views.student_marks_list,name="student_marks_list"),
     path('marks/<int:pk>/update',views.update_marks,name="update_marks"),
     path('student/<int:pk>/add',views.add_student.as_view(),name="add_student"),
@@ -54,6 +54,10 @@ urlpatterns =[
     path('reply_to_message/',views.reply_to_message, name='reply_to_message'),
     path('meeting_schedule_list/', views.meeting_schedule_list, name='meeting_schedule_list'),
 
+
+    path('create_classroom/', views.create_classroom, name='create_classroom'),
+
+    path('select_classroom/', views.select_classroom, name='select_classroom'),
 
 
 

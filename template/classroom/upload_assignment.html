@@ -1,31 +1,35 @@
 {% extends 'classroom/base.html' %}
-{% load bootstrap4 %}
+{% load bootstrap4 cache %}
 {% block content %}
 <div class="container ">
-		<div class="row">
-            <ol class="col-12 breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                <li class="breadcrumb-item active">Upload Assignment</li>
-            </ol>
+    <!-- ... your existing content ... -->
+    <div class="jumbotron bg-secondary text-white">
+        {% if assignment_uploaded %}
+        <h1>Assignment is uploaded successfully.</h1>
+        {% else %}
+        <form enctype="multipart/form-data" method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            
+            <!-- Add the subject name dropdown directly into the form -->
+            <div class="form-group">
+                <label for="classroom_select">Select Classroom:</label>
+                <select class="form-control" name="classroom_select" id="classroom_select">
+                    {% for classroom in created_classrooms %}
+                        <option value="{{ classroom.id }}">{{ classroom.subject_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        </div>
-
-       <div class="section-heading">
-            <h2> Upload Assignment</h2>
-            <div class="line-dec"></div>
-
-          </div>
-
-<div class="jumbotron bg-secondary text-white">
-  {% if assignment_uploaded %}
-  <h1>Assignment is uploaded successfully.</h1>
-  {% else %}
-  <form enctype="multipart/form-data" method="post">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    <input type="submit" class="btn btn-primary" name="" value="Upload">
-  </form>
-  {% endif %}
-</div>
+            <div class="form-group">
+                <label for="{{ form.deadline.id_for_label }}">Deadline:</label>
+                <input type="datetime-local" class="form-control" name="deadline" required>
+            </div>
+          
+            
+            <input type="submit" class="btn btn-primary" name="" value="Upload">
+        </form>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
