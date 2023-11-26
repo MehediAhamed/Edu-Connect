@@ -11,7 +11,7 @@
         </div>
 
        <div class="section-heading">
-            <h2>material</h2>
+        <h2 style="font-size:30px; font-family: 'Comic Sans MS', cursive;">Material</h2>
             <div class="line-dec"></div>
 
           </div>
@@ -19,7 +19,7 @@
   <div class="jumbotron ">
 
 {% if student.student_material.count == 0 %}
-  <h2 class="text-dark text-center">No materials Yet</h2>
+<h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">No materials Yet</h2>
 {% else %}
 
         <div class="row row-content">
@@ -30,7 +30,8 @@
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
-        <th scope="col">material Name</th>
+        <th scope="col">Material Name</th>
+        <th scope="col">Subject</th>
         <th scope="col">Uploaded By</th>
         <th scope="col">Uploaded Date</th>
         <th scope="col">Download</th>
@@ -41,6 +42,7 @@
         <tr>
           <th scope="row">{{ forloop.counter }}</th>
           <td>{{ material.material_name }}</td>
+          <td>{{ material.subject }}</td>
           <td>{{ material.teacher }}</td>
           <td>{{ material.created_at }}</td>
           <td><a href="{{ material.material.url }}" class="btn btn-primary" target="_blank">Download</a></td>

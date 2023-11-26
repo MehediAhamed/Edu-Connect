@@ -532,23 +532,54 @@ def upload_assignment(request):
     return render(request, 'classroom/upload_assignment.html', {'form': form, 'assignment_uploaded': assignment_uploaded, 'created_classrooms': created_classrooms})
 
 #material upload
+@transaction.atomic
 @login_required
 def upload_material(request):
     material_uploaded = False
     teacher = request.user.Teacher
     students = Student.objects.filter(user_student_name__teacher=request.user.Teacher)
+
+    created_classrooms = teacher.created_classrooms.all()
+
     if request.method == 'POST':
         form = MaterialForm(request.POST, request.FILES)
         if form.is_valid():
             upload = form.save(commit=False)
             upload.teacher = teacher
-            students = Student.objects.filter(user_student_name__teacher=request.user.Teacher)
+
+            # Retrieve the subject_id from the form data
+            subject_id = request.POST.get('classroom_select')
+
+            # Retrieve the subject name from the Classroom table
+            try:
+                selected_classroom = Classroom.objects.get(id=subject_id)
+                subject_name = selected_classroom.subject_name
+            except Classroom.DoesNotExist:
+                subject_name = ''
+
+            # Assign the subject to the form's subject field
+            upload.subject = subject_name
+            print(subject_name)
+            # Save the assignment
             upload.save()
+
+            # Add students to the assignment
             upload.student.add(*students)
+
             material_uploaded = True
     else:
         form = MaterialForm()
-    return render(request,'classroom/upload_material.html',{'form':form,'assignment_uploaded':material_uploaded})
+
+    return render(request, 'classroom/upload_material.html', {'form': form, 'material_uploaded':material_uploaded, 'created_classrooms': created_classrooms})
+
+
+
+
+
+
+
+
+
 
 
 ## Students getting the list of all the assignments uploaded by their teacher.
@@ -617,8 +648,8 @@ def update_assignment(request,id=None):
 
 
 
-## For updating the material later.
-@login_required
+## For updating the material later.@login_required
+
 def update_material(request,id=None):
     obj = get_object_or_404(ClassMaterial, id=id)
     form = MaterialForm(request.POST or None, instance=obj)
@@ -629,10 +660,14 @@ def update_material(request,id=None):
         obj = form.save(commit=False)
         if 'material' in request.FILES:
             obj.material = request.FILES['material']
+       
+
         obj.save()
         return redirect('classroom:material_list')
     template = "classroom/update_material.html"
     return render(request, template, context)
+
+
 
 
 

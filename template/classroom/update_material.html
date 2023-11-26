@@ -4,14 +4,14 @@
 		<div class="row">
             <ol class="col-12 breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'classroom:assignment_list' %}">Assignment List</a></li>
-                <li class="breadcrumb-item active">Update Assignment</li>
+                <li class="breadcrumb-item"><a href="{% url 'classroom:material_list' %}">Material List</a></li>
+                <li class="breadcrumb-item active" ></li>Update Material</li>
             </ol>
 
         </div>
 
        <div class="section-heading">
-            <h2>Update Assignment</h2>
+            <h2 style="font-size:30px; font-family: 'Comic Sans MS', cursive;">Update Material</h2>
             <div class="line-dec"></div>
 
           </div>
@@ -23,6 +23,9 @@
     {{ form.as_p }}
     <input type="submit" class="btn btn-danger" name="" value="Update">
   </form>
+
 </div>
+
+
 </div>
 {% endblock %}

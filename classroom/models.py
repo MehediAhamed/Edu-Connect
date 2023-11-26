@@ -114,6 +114,7 @@ class MessageToTeacher(models.Model):
         self.save()
 
 class ClassNotice(models.Model):
+    id = models.AutoField(primary_key=True)
     teacher = models.ForeignKey(Teacher, related_name='teacher', on_delete=models.CASCADE)
     students = models.ManyToManyField(Student, related_name='class_notice')
     created_at = models.DateTimeField(auto_now=True)
@@ -129,7 +130,7 @@ class ClassNotice(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        unique_together = ['teacher', 'message']
+        unique_together = ['teacher', 'message', 'id']
 
 class MeetLink(models.Model):
     teacher = models.ForeignKey(Teacher, related_name='teacher_meet', on_delete=models.CASCADE)
@@ -169,13 +170,15 @@ class ClassMaterial(models.Model):
     teacher = models.ForeignKey(Teacher, related_name='teacher_material', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=True)
     material_name = models.CharField(max_length=250)
-    material = models.FileField(upload_to='material')
+    material = models.FileField(upload_to='materials')
+    subject = models.TextField()
 
     def __str__(self):
         return self.material_name
 
     class Meta:
         ordering = ['-created_at']
+
 
 class SubmitAssignment(models.Model):
     student = models.ForeignKey(Student, related_name='student_submit', on_delete=models.CASCADE)

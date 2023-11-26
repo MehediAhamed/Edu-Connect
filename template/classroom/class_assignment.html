@@ -10,7 +10,7 @@
     </div>
 
     {% if student.student_assignment.count == 0 %}
-        <h2 class="text-dark text-center">No assignments Yet</h2>
+    <h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">No assignments Yet</h2>
     {% else %}
         <div class="jumbotron">
             {% regroup assignments by subject as assignment_list_by_subject %}

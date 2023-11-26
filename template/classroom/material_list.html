@@ -6,20 +6,20 @@
 		<div class="row">
             <ol class="col-12 breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                <li class="breadcrumb-item active">Material list</li>
+                <Material class="breadcrumb-item active" >Material list</li>
             </ol>
 
         </div>
 
        <div class="section-heading">
-            <h2>Material List</h2>
+            <h2 style="font-size: 30px; font-family: 'Comic Sans MS', cursive;">Material List</h2>
             <div class="line-dec"></div>
 
           </div>
 
   <div class="jumbotron">
 {% if teacher.teacher_material.count == 0 %}
-  <h2 class="text-dark text-center">No Material Uploaded Yet</h2>
+<center><h2 style="font-size: 30px; color:black; font-family: 'Comic Sans MS', cursive;">No Material Uploaded Yet</h2></center>
 {% else %}
  <div class="row row-content">
             <div class="col-12 col-sm-12">
@@ -31,6 +31,7 @@
       <tr>
         <th scope="col">#</th>
         <th scope="col">Material Name</th>
+        <th scope="col">Subject</th>
         <th scope="col">Uploaded Date</th>
         <th scope="col">Download</th>
         <th scope="col">Update</th>
@@ -42,6 +43,7 @@
         <tr>
           <th scope="row">{{ forloop.counter }}</th>
           <td>{{ material.material_name }}</td>
+          <td>{{ material.subject }}</td>
           <td>{{ material.created_at }}</td>
           <td><a href="{{ material.material.url }}" class="btn btn-primary" target="_blank">Download</a></td>
           <td><a href="{% url 'classroom:update_material' id=material.id %}" class="btn btn-primary">Update</a></td>
