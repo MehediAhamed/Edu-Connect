@@ -12,10 +12,10 @@
         </div>
 
     {% if registered %}
-    <h1>Thank you for registering.</h1>
+    <center><h1 class="text-center" style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Thank you for registering.</h1></center>
     {% else %}
       <div class="section-heading">
-            <h2>Sign up as a Teacher</h2>
+        <h2 class="text-center" style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Sign up as a Teacher</h2>
             <div class="line-dec"></div>
 
           </div>
@@ -39,18 +39,28 @@
                     </div>
 
             	<div class="form-group row">
-                        <label for="" class=" col-md-3 col-form-label">Subject Name <strong class="text-warning">*</strong></label>
+                        <label for="" class=" col-md-3 col-form-label">University Name <strong class="text-warning">*</strong></label>
                         <div class="col-md-9">
-                             <input type="text" class="form-control" required id="name" name="subject_name" placeholder="Subject Name">
+                             <input type="text" class="form-control" required id="university_name" name="university_name" placeholder="University Name">
                         </div>
                     </div>
 
-            	<div class="form-group row">
-                        <label for="" class=" col-md-3 col-form-label">Phone <strong class="text-warning">*</strong></label>
-                        <div class="col-md-9">
-                        <input type="tel" class="form-control" required  id="telnum" name="phone" placeholder="Tel. number">
-                        </div>
+                    <div class="form-group row">
+                      <label for="" class=" col-md-3 col-form-label">Degree <strong class="text-warning">*</strong></label>
+                      <div class="col-md-9">
+                           <input type="text" class="form-control" required id="degree" name="degree" placeholder="Degree">
+                      </div>
+                  </div>
+
+
+
+                    
+                  <div class="form-group row">
+                    <label for="" class=" col-md-3 col-form-label">Department <strong class="text-warning">*</strong></label>
+                    <div class="col-md-9">
+                         <input type="text" class="form-control" required id="department" name="department" placeholder="Department">
                     </div>
+                </div>
 
             	<div class="form-group row">
                         <label for="" class=" col-md-3 col-form-label">Email  <strong class="text-warning">*</strong></label>
@@ -62,15 +72,14 @@
 
       {{ user_form.non_field_errors }}
 
+      <div class="form-group row">
+        <label for="" class=" col-md-3 col-form-label">Username <strong class="text-warning">*</strong></label>
+        <div class="col-md-9">
+         <input type="text" class="form-control" required id="name" name="username" placeholder="Username">
+            <p>  <small> Letters, digits and @/./+/-/_ only.</small></p>
+        </div>
 
-    <div class="form-group row">
-                        <label for="" class=" col-md-3 col-form-label">Username <strong class="text-warning">*</strong></label>
-                        <div class="col-md-9">
-                         <input type="text" class="form-control" required id="name" name="username" placeholder="Username">
-                            <p>  <small> Letters, digits and @/./+/-/_ only.</small></p>
-                        </div>
-
-                    </div>
+    </div>
 
                     <div class="form-group row">
                         <label for="" class=" col-md-3 col-form-label">Password <strong class="text-warning">*</strong></label>

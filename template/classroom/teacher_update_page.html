@@ -13,13 +13,13 @@
         </div>
 
        <div class="section-heading">
-            <h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Update Profile</h2>
+            <h1 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Update Profile</h1>
             <div class="line-dec"></div>
 
           </div>
   <div class="jumbotron bg-dark text-white">
 {% if profile_updated %}
-<h1 class="text-center" style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Your profile has been successfully updated!!!</h1>
+<h2 class="text-center" style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Your profile has been successfully updated!!!</h2>
 {% else %}
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}

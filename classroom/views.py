@@ -4,6 +4,15 @@ from django.views.generic import  (View,TemplateView,
                                   ListView,DetailView,
                                   CreateView,UpdateView,
                                   DeleteView)
+from django import forms
+from django.contrib import messages
+from django.urls import reverse
+from django.shortcuts import get_object_or_404, redirect
+from django.views import generic
+from .models import Student, StudentsInClass
+from django.shortcuts import render
+from django.db.models import Q
+from .models import StudentsInClass, Student
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,7 +28,6 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.db.models import Q
 from django.core.mail import send_mail
 from django.shortcuts import render, HttpResponse  
-from django.core.cache import cache
 
 
 from django.shortcuts import render, get_object_or_404
@@ -30,10 +38,24 @@ from .forms import ClassroomCreationForm, MessageForm
 
 
 
+from django.core.cache import cache
+from django.db import transaction
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
+from django.core.cache import cache
+from django.db import transaction
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Classroom
+from django.shortcuts import render, redirect
+from .models import MessageToTeacher
+
 from django.contrib.auth.decorators import login_required
 from functools import wraps
 from django.http import HttpResponseForbidden
 
+from django.contrib import messages
 
 
 # For Teacher Sign Up
@@ -172,9 +194,7 @@ def TeacherUpdateView(request,pk):
     return render(request,'classroom/teacher_update_page.html',{'profile_updated':profile_updated,'form':form})
 
 ## List of all students that teacher has added in their class.
-from django.shortcuts import render
-from django.db.models import Q
-from .models import StudentsInClass, Student
+
 
 def class_students_list(request):
     query = request.GET.get("q", "")
@@ -399,12 +419,7 @@ def student_marks_list(request,pk):
     return render(request,'classroom/student_marks_list.html',{'student':student,'given_marks':given_marks})
 
 ## To add student in the class.from django.contrib import messages
-from django import forms
-from django.contrib import messages
-from django.urls import reverse
-from django.shortcuts import get_object_or_404, redirect
-from django.views import generic
-from .models import Student, StudentsInClass
+
 
 class AddStudentForm(forms.Form):
     subject_name = forms.CharField(max_length=255)
@@ -443,7 +458,6 @@ def student_added(request):
     return render(request,'classroom/student_added.html',{})
 
 # List of students which are not added by teacher in their class.
-from .models import Classroom
 
 def students_list(request):
     query = request.GET.get('q')
@@ -479,16 +493,6 @@ def teachers_list(request):
 
 
 
-
-from django.core.cache import cache
-from django.db import transaction
-from django.shortcuts import render, redirect
-from django.contrib import messages
-
-from django.core.cache import cache
-from django.db import transaction
-from django.shortcuts import render, redirect
-from django.contrib import messages
 
 @transaction.atomic
 @login_required
@@ -782,8 +786,6 @@ def video_meet_view(request):
     return render(request, 'classroom/video_meet.html')
 
 
-from django.shortcuts import render, redirect
-from .models import MessageToTeacher
 
 # Your other imports and views...
 
@@ -840,6 +842,7 @@ def teacher_required(view_func):
 
 @login_required
 
+
 def create_classroom(request):
     print("Entering create_classroom view")  # Check if the view is being accessed
     if request.method == 'POST':
@@ -856,13 +859,17 @@ def create_classroom(request):
             classroom.save()
             teacher.created_classrooms.add(classroom)
             print("Classroom saved successfully")
-            return render(request,'classroom/base.html')
+            messages.success(request, 'Classroom created successfully!')
+
+            # Redirect to the same page with the success message
+            return redirect('classroom:create_classroom')
         else:
             print(form.errors)  # Print form errors to the console
     else:
         form = ClassroomCreationForm()
 
     return render(request, 'classroom/create_classroom.html', {'form': form})
+
 
 @login_required
 

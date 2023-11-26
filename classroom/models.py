@@ -36,8 +36,7 @@ class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='Student')
     name = models.CharField(max_length=250)
     roll_no = models.CharField(max_length=50)
-    email = models.EmailField(max_length=254)
-    phone = models.IntegerField()
+    email = models.EmailField(max_length=254, unique=True)
     student_profile_pic = models.ImageField(upload_to="classroom/student_profile_pic", blank=True)
 
     def get_absolute_url(self):
@@ -52,9 +51,11 @@ class Student(models.Model):
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='Teacher')
     name = models.CharField(max_length=250)
-    subject_name = models.CharField(max_length=250)
-    email = models.EmailField(max_length=254)
-    phone = models.IntegerField()
+    university_name = models.CharField(max_length=250)
+    degree = models.CharField(max_length=250)
+    department = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(max_length=254, unique=True)
+
     teacher_profile_pic = models.ImageField(upload_to="classroom/teacher_profile_pic", blank=True)
     class_students = models.ManyToManyField(Student, through="StudentsInClass")
     created_classrooms = models.ManyToManyField(Classroom, related_name='teachers_created', blank=True)
@@ -64,7 +65,7 @@ class Teacher(models.Model):
 
     def __str__(self):
         return self.name
-
+    
 class StudentMarks(models.Model):
     teacher = models.ForeignKey(Teacher, related_name='given_marks', on_delete=models.CASCADE)
     student = models.ForeignKey(Student, related_name="marks", on_delete=models.CASCADE)

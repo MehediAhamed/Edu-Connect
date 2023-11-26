@@ -11,38 +11,38 @@ class UserForm(UserCreationForm):
         model = User
         fields = ['username','password1','password2']
         widgets = {
-                'username': forms.TextInput(attrs={'class':'answer'}),
+                'username': forms.EmailInput(attrs={'class':'answer'}),
                 'password1': forms.PasswordInput(attrs={'class':'answer'}),
                 'password2': forms.PasswordInput(attrs={'class':'answer'}),
                 }
 
 ## Teacher Registration Form
 class TeacherProfileForm(forms.ModelForm):
-    class Meta():
-        model =  Teacher
-        fields = ['name','subject_name','phone','email']
+    class Meta:
+        model = Teacher
+        fields = ['name', 'university_name', 'degree', 'department', 'email']
         widgets = {
-                'name': forms.TextInput(attrs={'class':'answer'}),
-                'subject_name': forms.TextInput(attrs={'class':'answer'}),
-                'phone': forms.NumberInput(attrs={'class':'answer'}),
-                'email': forms.EmailInput(attrs={'class':'answer'}),
-                }
+            'name': forms.TextInput(attrs={'class': 'answer'}),
+            'university_name': forms.TextInput(attrs={'class': 'answer'}),
+            'degree': forms.NumberInput(attrs={'class': 'answer'}),
+            'department': forms.NumberInput(attrs={'class': 'answer'}),
+            'email': forms.EmailInput(attrs={'class': 'answer'}),
+        }
 
 ## Teacher Profile Update Form
 class TeacherProfileUpdateForm(forms.ModelForm):
     class Meta():
         model = Teacher
-        fields = ['name','email','phone','teacher_profile_pic']
+        fields = ['name','university_name','degree', 'department','teacher_profile_pic']
 
 ## Student Registration Form
 class StudentProfileForm(forms.ModelForm):
     class Meta():
         model =  Student
-        fields = ['name','roll_no','phone','email']
+        fields = ['name','roll_no','email']
         widgets = {
                 'name': forms.TextInput(attrs={'class':'answer'}),
                 'roll_no': forms.NumberInput(attrs={'class':'answer'}),
-                'phone': forms.NumberInput(attrs={'class':'answer'}),
                 'email': forms.EmailInput(attrs={'class':'answer'}),
                 }
 
@@ -50,7 +50,7 @@ class StudentProfileForm(forms.ModelForm):
 class StudentProfileUpdateForm(forms.ModelForm):
     class Meta():
         model = Student
-        fields = ['name','roll_no','email','phone','student_profile_pic']
+        fields = ['name','roll_no','student_profile_pic']
 
 ## Form for uploading marks and also for updating it.
 class MarksForm(forms.ModelForm):

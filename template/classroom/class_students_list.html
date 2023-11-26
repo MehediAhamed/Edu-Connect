@@ -15,7 +15,7 @@
     </div>
 
     {% if class_students_list.count == 0 %}
-    <h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">No students in the class.</h2>
+    <center><h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">No student is in the class.</h2></center>
     {% else %}
     <form method='GET' action="{% url 'classroom:class_student_list' %}" class="mb-3">
         <div class="input-group md-form form-sm form-2 pl-0">
