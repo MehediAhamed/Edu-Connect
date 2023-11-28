@@ -28,14 +28,16 @@ class Classroom(models.Model):
 
 
 class Attendance(models.Model):
-    roll_no = models.CharField(max_length=255)
-    classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
+   
+    roll_no = models.ForeignKey('Student', on_delete=models.CASCADE, to_field='roll_no', db_column='roll_no')
+
+    #classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='Student')
     name = models.CharField(max_length=250)
-    roll_no = models.CharField(max_length=50)
+    roll_no = models.CharField(max_length=50,unique=True)
     email = models.EmailField(max_length=254, unique=True)
     student_profile_pic = models.ImageField(upload_to="classroom/student_profile_pic", blank=True)
 
@@ -62,7 +64,9 @@ class Teacher(models.Model):
 
     def get_absolute_url(self):
         return reverse('classroom:teacher_detail', kwargs={'pk': self.pk})
-
+    
+    def get_students_in_class(self, classroom):
+        return classroom.students.all()
     def __str__(self):
         return self.name
     

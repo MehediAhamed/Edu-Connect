@@ -62,6 +62,8 @@ urlpatterns =[
 
     path('select_classroom/', views.select_classroom, name='select_classroom'),
 
+    path('scan/', views.scan_view, name='scan'),
+    path('receive/', views.receive_data, name='receive'),
 
 
 

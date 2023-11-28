@@ -234,32 +234,44 @@ def attendance_list(request):
     students = StudentsInClass.objects.filter(teacher=request.user.Teacher)
     students_list = [x.student for x in students]
     qs = Attendance.objects.all()
-    
+
     if query is not None:
-        qs = qs.filter(
-                Q(name__icontains=query)
-                )
-  
-    qs_one = []
-    qs_two = []
-    for x in qs:
-        for y in students_list:
-            if x.roll_no == y.roll_no:
-        # if x.roll_no ==
-        # if x in students_list:
-                qs_one.append(x)
-                qs_two.append(y)
-        # else:
-        #     pass
-    zipped_data = [{'attendance': attendance, 'info': info} for attendance, info in zip(qs_one, qs_two)]
+        qs = qs.filter(Q(name__icontains=query))
+
+    # Get today's date
+    today = timezone.now().date()
+
+    # Use sets to store unique attendance records
+    today_data_set = set()
+    past_data_set = set()
+
+    # Filter attendance for students in the class
+    for student in students_list:
+        attendance_for_student = qs.filter(roll_no=student.roll_no)
+
+        for attendance in attendance_for_student:
+            att_date = attendance.timestamp.date()
+
+            if att_date == today:
+                today_data_set.add((attendance, student))
+            else:
+                past_data_set.add((attendance, student))
+
+    # Convert sets back to lists for further processing
+    today_data = [{'attendance': att, 'info': info} for att, info in today_data_set]
+    past_data = [{'attendance': att, 'info': info} for att, info in past_data_set]
+
+    # Sort the data based on timestamp in descending order
+    today_data = sorted(today_data, key=lambda x: x['attendance'].timestamp, reverse=True)
+    past_data = sorted(past_data, key=lambda x: x['attendance'].timestamp, reverse=True)
+
     context = {
-        "attendance_list": zipped_data,
-        # "student_info": qs_two,
+        "today_data": today_data,
+        "past_data": past_data,
     }
-    print(zipped_data)
-    # print(qs_two)
     template = "classroom/attendance_list.html"
     return render(request, template, context)
+
 
 class ClassStudentsListView(LoginRequiredMixin,DetailView):
     model = models.Teacher
@@ -270,6 +282,8 @@ class AttendanceView(LoginRequiredMixin,DetailView):
     model = models.Teacher
     template_name = "classroom/attendance_list.html"
     context_object_name = "teacher"
+
+
 
 ## For Marks obtained by the student in all subjects.
 class StudentAllMarksList(LoginRequiredMixin,DetailView):
@@ -893,3 +907,39 @@ def select_classroom(request):
         return render(request, 'classroom/base.html')
 
     return render(request, 'classroom/select_classroom.html', {'created_classrooms': created_classrooms})
+
+
+# Scan Arduino
+def scan_view(request):
+    return render(request, 'classroom/scan.html')
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from django.db import connection
+
+
+@csrf_exempt
+def receive_data(request):
+    if request.method == 'POST':
+        try:
+            data = request.POST.get('data', '')
+            timestamp = timezone.now()  # Set the timestamp here
+            
+            
+            
+            # Store data in the SQLite database
+            with connection.cursor() as cursor:
+                if data != 'Error: Buffer overflow detected!':
+                    if len(data) == 7:
+                        print(data)
+            # Use parameterized query to prevent SQL injection
+                        cursor.execute("INSERT INTO classroom_attendance (roll_no, timestamp) VALUES (?, ?)", (data, timestamp))
+                        
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})

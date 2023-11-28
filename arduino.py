@@ -2,9 +2,9 @@
 # import sqlite3
 # import time
 # from datetime import datetime
-#
+
 # port = 'COM7'
-#
+
 # while True:
 #     try:
 #         ser = serial.Serial(port, 9600)
@@ -13,7 +13,7 @@
 #     except serial.SerialException:
 #         print(f"Waiting for connection...")
 #         time.sleep(3)  # Wait for 3 seconds before trying again
-#
+
 # try:
 #     while ser.is_open:
 #         data = ser.readline().strip()

@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arduino Scanner</title>
+</head>
+<body>
+  <h1>Arduino Scanner</h1>
+  <button onclick="startScanning()">Start Scanning</button>
+
+  <script>
+    async function startScanning() {
+      try {
+        const port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 9600 });
+
+        const reader = port.readable.getReader();
+
+        while (true) {
+          const { value, done } = await reader.read();
+
+          if (done) {
+            break;
+          }
+
+          const data = new TextDecoder().decode(value).trim();
+          console.log('Received data:', data);
+
+          if (data !== 'Error: Buffer overflow detecteded!') {
+            // Send data to the server
+            sendDataToServer(data);
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    // async function sendDataToServer(data) {
+    //   try {
+    //     const response = await fetch('http://educonnect008.pythonanywhere.com/receive', {
+    //       method: 'POST',
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //       },
+    //       body: JSON.stringify({ data: data }),
+    //     });
+
+    //     if (!response.ok) {
+    //       throw new Error(`HTTP error! Status: ${response.status}`);
+    //     }
+
+    //     console.log('Data sent successfully:', data);
+    //   } catch (error) {
+    //     console.error('Error sending data to the server:', error);
+    //   }
+    // }
+
+
+    async function sendDataToServer(data) {
+  try {
+    const response = await fetch('{% url "classroom:receive" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': '{{ csrf_token }}',  // Include CSRF token for POST requests
+      },
+      body: new URLSearchParams({ data: data }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    console.log('Data sent successfully:', data);
+  } catch (error) {
+    console.error('Error sending data to the server:', error);
+  }
+}
+
+  </script>
+</body>
+</html>
+

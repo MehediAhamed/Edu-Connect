@@ -12,13 +12,13 @@
         </div>
 
        <div class="section-heading">
-            <h2 >Submit Assignment</h2>
+            <h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Submit Assignment</h2>
             <div class="line-dec"></div>
           </div>
 
-<div class="jumbotron bg-dark text-white">
-  <h2>You can't edit after Submit.</h2>
-  <form enctype="multipart/form-data" method="post">
+<div class="jumbotron bg-dark text-white" style="max-width: 60%; margin: auto;">
+  <h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">You can't edit after your submission</h2>
+  <form enctype="multipart/form-data" method="post" >
     {% csrf_token %}
     {% bootstrap_form form %}
     <input type="submit" class="btn btn-primary" name="" value="Submit">
