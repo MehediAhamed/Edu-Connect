@@ -293,22 +293,77 @@ class StudentAllMarksList(LoginRequiredMixin,DetailView):
 
 ## To give marks to a student.
 @login_required
-def add_marks(request,pk,subject):
-    marks_given = False
-    student = get_object_or_404(models.Student,pk=pk)
+def add_marks(request, pk, subject):
+    student = get_object_or_404(Student, pk=pk)
+
     if request.method == "POST":
         form = MarksForm(request.POST)
+        
         if form.is_valid():
             marks = form.save(commit=False)
             marks.student = student
             marks.teacher = request.user.Teacher
-            marks.subject_name=subject
+            marks.subject_name = subject
             marks.save()
-            messages.success(request,'Marks uploaded successfully!')
+
+            # Update marks_added in SubmitAssignment
+            submit_assignment = SubmitAssignment.objects.filter(
+                teacher=request.user.Teacher,
+                student=student,
+                submitted_assignment__subject=subject
+            ).first()
+
+            if submit_assignment:
+                submit_assignment.marks_added = True
+                submit_assignment.save()
+
+            messages.success(request, 'Marks uploaded successfully!')
             return redirect('classroom:submit_list')
+        else:
+            print("Form errors:", form.errors)
     else:
         form = MarksForm()
-    return render(request,'classroom/add_marks.html',{'form':form,'student':student,'marks_given':marks_given, 'subject': subject})
+
+    return render(request, 'classroom/add_marks.html', {'form': form, 'student': student, 'subject': subject})
+
+
+# Update add_marks_list view function
+@login_required
+def add_marks_list(request, pk, subject, assignment_id):
+    student = get_object_or_404(Student, pk=pk)
+    assignment = get_object_or_404(ClassAssignment, pk=assignment_id)
+
+    if request.method == "POST":
+        form = MarksForm(request.POST)
+        
+        if form.is_valid():
+            marks = form.save(commit=False)
+            marks.student = student
+            marks.teacher = request.user.Teacher
+            marks.subject_name = subject
+            marks.assignment_name = assignment  # Set the assignment_name based on the assignment object
+            marks.save()
+
+            # Update marks_added in SubmitAssignment
+            submit_assignment = SubmitAssignment.objects.filter(
+                teacher=request.user.Teacher,
+                student=student,
+                submitted_assignment__subject=subject,
+                submitted_assignment__id=assignment_id
+            ).first()
+
+            if submit_assignment:
+                submit_assignment.marks_added = True
+                submit_assignment.save()
+
+            messages.success(request, 'Marks uploaded successfully!')
+            return redirect('classroom:submit_list')
+        else:
+            print("Form errors:", form.errors)
+    else:
+        form = MarksForm()
+
+    return render(request, 'classroom/add_marks.html', {'form': form, 'student': student, 'subject': subject})
 
 ## For updating marks.
 @login_required
@@ -324,6 +379,30 @@ def update_marks(request,pk):
     else:
         form = MarksForm(request.POST or None,instance=obj)
     return render(request,'classroom/update_marks.html',{'form':form,'marks_updated':marks_updated})
+
+
+
+# For updating marks.
+@login_required
+
+def update_marks_list(request, pk, subject):
+    marks_updated = False
+
+   
+
+    # Retrieve the student marks object
+    obj = get_object_or_404(StudentMarks, student__pk=pk, subject_name=subject)
+
+    if request.method == "POST":
+        form = MarksForm(request.POST, instance=obj)
+        if form.is_valid():
+            marks = form.save(commit=False)
+            marks.save()
+            marks_updated = True
+    else:
+        form = MarksForm(instance=obj)
+
+    return render(request, 'classroom/update_marks.html', {'form': form, 'marks_updated': marks_updated, 'assignment': assignment})
 
 ## For writing notice which will be sent to all class students.
 @login_required
@@ -425,12 +504,17 @@ def class_notice(request,pk):
 
 ## To see the list of all the marks given by the techer to a specific student.
 @login_required
-def student_marks_list(request,pk):
-    error = True
-    student = get_object_or_404(models.Student,pk=pk)
+def student_marks_list(request, pk):
+    student = get_object_or_404(Student, pk=pk)
     teacher = request.user.Teacher
-    given_marks = StudentMarks.objects.filter(teacher=teacher,student=student)
-    return render(request,'classroom/student_marks_list.html',{'student':student,'given_marks':given_marks})
+
+    # Fetch student marks with assignment information
+    given_marks = StudentMarks.objects.filter(teacher=teacher, student=student).select_related('assignment_name')
+
+    return render(request, 'classroom/student_marks_list.html', {'student': student, 'given_marks': given_marks})
+
+
+
 
 ## To add student in the class.from django.contrib import messages
 
@@ -751,7 +835,17 @@ def submit_list(request):
     submitted_assignments = SubmitAssignment.objects.filter(teacher=teacher)
     subjects = submitted_assignments.values_list('submitted_assignment__subject', flat=True).distinct()
 
-    return render(request, 'classroom/submit_list.html', {'teacher': teacher, 'subjects': subjects})
+    # Check whether marks have been added for each submission
+    for submission in submitted_assignments:
+        marks_added = StudentMarks.objects.filter(
+            teacher=teacher,
+            student=submission.student,
+            subject_name=submission.submitted_assignment.subject
+        ).exists()
+        submission.marks_added = marks_added
+        print(submission.marks_added)
+    return render(request, 'classroom/submit_list.html', {'teacher': teacher, 'subjects': subjects, 'submitted_assignments': submitted_assignments})
+
 
 
 ##################################################################################################
@@ -826,15 +920,31 @@ def reply_to_message(request):
     return render(request, "classroom/messages_list.html")
 
 
-def meeting_schedule_list(request):
-    # Retrieve meeting schedules from the database
-    meeting_schedules = MeetLink.objects.all()
+def meeting_schedule_list(request, pk):
+    student = get_object_or_404(models.Student, pk=pk)
 
-    context = {
-        'meeting_schedules': meeting_schedules,
-    }
+    # Get all the meeting schedules sent to the student
+    meeting_schedules = MeetLink.objects.filter(students=student)
+    
+    print(meeting_schedules)
+    # Extract teacher names and links from meeting schedules
+    teacher_names_and_links = [(meeting_schedule.teacher.name,meeting_schedule.created_at, meeting_schedule.message) for meeting_schedule in meeting_schedules]
 
-    return render(request, 'classroom/meeting_schedule_list.html', context)
+    return render(request, 'classroom/stu_meeting_list.html', {'student': student, 'teacher_names_and_links': teacher_names_and_links})
+
+
+def meeting_schedule_list_teacher(request, pk):
+    teacher = get_object_or_404(models.Teacher, pk=pk)
+    classrooms = teacher.created_classrooms.all()
+    
+    print("Teacher:", teacher)
+    print("Classrooms:", classrooms)
+    
+    meeting_schedules = MeetLink.objects.filter(teacher=teacher)
+    
+
+    return render(request, 'classroom/meeting_schedule_list.html', {'teacher': teacher, 'meeting_schedules': meeting_schedules})
+
 
 
 

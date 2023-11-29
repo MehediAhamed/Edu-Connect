@@ -5,23 +5,19 @@
     <div class="row">
         <ol class="col-12 breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-            <li class="breadcrumb-item active" >Meeting Schedules</li>
+            <li class="breadcrumb-item active">Meeting Schedules</li>
         </ol>
     </div>
 
     <div class="section-heading">
-        <h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Meeting Schedules</h2>
+        <h2 style="font-size: 30px; font-family: 'Comic Sans MS', cursive;">Meeting Schedules</h2>
         <div class="line-dec"></div>
     </div>
 
     {% if meeting_schedules %}
-
-    
-
         <table class="table table-striped">
             <thead class="thead-dark">
                 <tr>
-                    
                     <th scope="col">Teacher Name</th>
                     <th scope="col">Starting Time</th>
                     <th scope="col">Meeting Link</th>
@@ -42,7 +38,15 @@
             </tbody>
         </table>
     {% else %}
-    <center><h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">No meeting schedule is available!!!</h2></center>
+        <center>
+            <h2 style="font-size: 30px; font-family: 'Comic Sans MS', cursive;">
+                {% if student %}
+                    No meeting schedule is available for this student!!!
+                {% elif teacher %}
+                    No meeting schedule is available for your classrooms!!!
+                {% endif %}
+            </h2>
+        </center>
     {% endif %}
 </div>
 {% endblock %}

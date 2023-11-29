@@ -12,12 +12,12 @@
         </div>
 
        <div class="section-heading">
-            <h2>Delete Assignment</h2>
+            <h2 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Delete Assignment</h2>
             <div class="line-dec"></div>
 
           </div>
-  <div class="jumbotron bg-dark text-white">
-    <h1>Delete {{ object.assignment_name }}?</h1>
+  <div class="jumbotron bg-dark text-white" style="max-width: 400px; margin: 0 auto;">
+    <h1 style="font-size: 30px;  font-family: 'Comic Sans MS', cursive;">Delete {{ object.assignment_name }}?</h1>
 
     <form method='POST'>
       {% csrf_token %}

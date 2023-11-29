@@ -50,10 +50,20 @@
                                         <th scope="row">{{ forloop.counter }}</th>
                                         <td>{{ submission.student.name }}</td>
                                         <td>{{ submission.submitted_assignment.assignment_name }}</td>
-                                        <td>{{ submission.submitted_assignment.subject }}</td> {# Assuming subject is a field in ClassAssignment model #}
+                                        <td>{{ submission.submitted_assignment.subject }}</td>
                                         <td>{{ submission.created_at }}</td>
                                         <td><a href="{{ submission.submit.url }}" class="btn btn-primary" target="_blank">Download</a></td>
-                                        <td><a class="btn btn-danger" href="{% url 'classroom:enter_marks' pk=submission.student.pk subject=submission.submitted_assignment.subject %}">Enter Marks</a></td>
+                                        <td>
+                                            {% if submission.marks_added %}
+                                            <a class="btn btn-warning" href="{% url 'classroom:student_marks_list' pk=submission.student.pk  %}">Show All Marks</a>
+                                            {% else %}
+                                            <a class="btn btn-danger" href="{% url 'classroom:enter_marks_list' pk=submission.student.pk subject=submission.submitted_assignment.subject assignment_id=submission.submitted_assignment.id %}">Enter Marks</a>
+                                            {% endif %}
+                                        <!-- {{ submission.marks_added }} -->
+
+                                        </td>
+                                        
+                                        
                                     </tr>
                                 {% endfor %}
                             </tbody>

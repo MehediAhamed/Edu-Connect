@@ -31,7 +31,6 @@ class Attendance(models.Model):
    
     roll_no = models.ForeignKey('Student', on_delete=models.CASCADE, to_field='roll_no', db_column='roll_no')
 
-    #classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
 
 class Student(models.Model):
@@ -70,15 +69,7 @@ class Teacher(models.Model):
     def __str__(self):
         return self.name
     
-class StudentMarks(models.Model):
-    teacher = models.ForeignKey(Teacher, related_name='given_marks', on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, related_name="marks", on_delete=models.CASCADE)
-    subject_name = models.CharField(max_length=250)
-    marks_obtained = models.IntegerField()
-    maximum_marks = models.IntegerField()
 
-    def __str__(self):
-        return self.subject_name
 
 class StudentsInClass(models.Model):
     teacher = models.ForeignKey(Teacher, related_name="class_teacher", on_delete=models.CASCADE)
@@ -138,6 +129,7 @@ class ClassNotice(models.Model):
         unique_together = ['teacher', 'message', 'id']
 
 class MeetLink(models.Model):
+    id = models.AutoField(primary_key=True)
     teacher = models.ForeignKey(Teacher, related_name='teacher_meet', on_delete=models.CASCADE)
     students = models.ManyToManyField(Student, related_name='class_meet')
     created_at = models.DateTimeField(auto_now=True)
@@ -153,7 +145,7 @@ class MeetLink(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        unique_together = ['teacher', 'message']
+        unique_together = ['teacher', 'message','id']
 
 class ClassAssignment(models.Model):
     student = models.ManyToManyField(Student, related_name='student_assignment')
@@ -163,6 +155,7 @@ class ClassAssignment(models.Model):
     assignment = models.FileField(upload_to='assignments')
     deadline = models.DateTimeField()
     subject = models.TextField()
+
 
     def __str__(self):
         return self.assignment_name
@@ -191,8 +184,22 @@ class SubmitAssignment(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     submitted_assignment = models.ForeignKey(ClassAssignment, related_name='submission_for_assignment', on_delete=models.CASCADE)
     submit = models.FileField(upload_to='Submission')
-
+    marks_added = models.BooleanField(default=False)  # Add this line
+    assignment_id = models.AutoField(primary_key=True)
     def __str__(self):
         return "Submitted" + str(self.submitted_assignment.assignment_name)
     class Meta:
         ordering = ['-created_at']
+
+
+class StudentMarks(models.Model):
+    teacher = models.ForeignKey(Teacher, related_name='given_marks', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, related_name="marks", on_delete=models.CASCADE)
+    subject_name = models.CharField(max_length=250)
+    assignment_name = models.ForeignKey(ClassAssignment, related_name="marks", on_delete=models.CASCADE)  # Add this line
+
+    marks_obtained = models.IntegerField()
+    maximum_marks = models.IntegerField()
+    
+    def __str__(self):
+        return self.subject_name

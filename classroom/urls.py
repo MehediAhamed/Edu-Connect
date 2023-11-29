@@ -15,11 +15,18 @@ urlpatterns =[
     path('teacher/<int:pk>/',views.TeacherDetailView.as_view(),name="teacher_detail"),
     path('update/student/<int:pk>/',views.StudentUpdateView,name="student_update"),
     path('update/teacher/<int:pk>/',views.TeacherUpdateView,name="teacher_update"),
-    path('student/<int:pk>/enter_marks',views.add_marks,name="enter_marks"),
+    # path('student/<int:pk>/enter_marks',views.add_marks,name="enter_marks"),
 
     path('student/<int:pk>/<str:subject>/enter_marks',views.add_marks,name="enter_marks"),
     path('student/<int:pk>/marks_list',views.student_marks_list,name="student_marks_list"),
     path('marks/<int:pk>/update',views.update_marks,name="update_marks"),
+
+path('marks_list/<int:pk>/update/<str:subject>/', views.update_marks_list, name='update_marks_list'),
+path('student/<int:pk>/enter_marks/<str:subject>/<int:assignment_id>/', views.add_marks_list, name='enter_marks_list'),
+
+
+
+
     path('student/<int:pk>/add',views.add_student.as_view(),name="add_student"),
     path('student_added/',views.student_added,name="student_added"),
     path('students_list/',views.students_list,name="students_list"),
@@ -55,7 +62,9 @@ urlpatterns =[
     path('change_password/',views.change_password,name="change_password"),
     path('video_meet/', views.video_meet_view, name='video_meet'),
     path('reply_to_message/',views.reply_to_message, name='reply_to_message'),
-    path('meeting_schedule_list/', views.meeting_schedule_list, name='meeting_schedule_list'),
+    path('meeting_schedule_list_teacher/<int:pk>/', views.meeting_schedule_list_teacher, name='meeting_schedule_list_teacher'),
+
+    path('meeting_schedule_list/<int:pk>/', views.meeting_schedule_list, name='meeting_schedule_list'),
 
 
     path('create_classroom/', views.create_classroom, name='create_classroom'),
