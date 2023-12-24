@@ -28,14 +28,14 @@ SECRET_KEY = '13x8r2se41dawv$7!a-p_h4ni$^i^+r@le7wuadd6gmzb=$ss*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_HOST_USER = 'anirudha.17me010@sode-edu.in'
-EMAIL_HOST_USER = 'tawsifdipto17@gmail.com'
-EMAIL_HOST_PASSWORD = '**********'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST_USER = 'adcommerce247@gmail.com'
+EMAIL_HOST_PASSWORD = 'elatnolhvnbrnlzr'
+DEFAULT_FROM_EMAIL = 'adcommerce247@gmail.com'
 
 ALLOWED_HOSTS = [ '*' ]
 
@@ -44,7 +44,7 @@ AUTH_USER_MODEL = 'classroom.User'
 # Application definition
 
 INSTALLED_APPS = [
-
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -150,3 +150,4 @@ STATICFILES_DIRS = [STATIC_DIR,]
 
 MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

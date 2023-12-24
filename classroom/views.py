@@ -16,6 +16,7 @@ from .models import StudentsInClass, Student
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import PasswordResetView
 # Create your views here.
 from classroom.forms import UserForm,TeacherProfileForm,StudentProfileForm,MarksForm,MessageForm,NoticeForm,AssignmentForm,MaterialForm,SubmitForm,TeacherProfileUpdateForm,StudentProfileUpdateForm,MeetForm
 from django.urls import reverse
@@ -25,6 +26,8 @@ from django.http import HttpResponseRedirect,HttpResponse
 from classroom import models
 from classroom.models import StudentsInClass,StudentMarks,ClassAssignment,SubmitAssignment,Student,Teacher,Attendance,ClassMaterial
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import PasswordResetForm
+from django.urls import reverse_lazy
 from django.db.models import Q
 from django.core.mail import send_mail
 from django.shortcuts import render, HttpResponse  
@@ -79,6 +82,7 @@ def TeacherSignUp(request):
 
             registered = True
         else:
+            messages.error(request,"Credentials Error")
             print(user_form.errors,teacher_profile_form.errors)
     else:
         user_form = UserForm()
@@ -108,6 +112,8 @@ def StudentSignUp(request):
 
             registered = True
         else:
+            # var = str(user_form.errors)+ str(student_profile_form.errors)
+            messages.error(request,"Credentials Error")
             print(user_form.errors,student_profile_form.errors)
     else:
         user_form = UserForm()
@@ -867,6 +873,53 @@ def change_password(request):
         form = PasswordChangeForm(user=request.user)
         args = {'form':form}
         return render(request,'classroom/change_password.html',args)
+    
+    
+# class CustomPasswordResetView(PasswordResetView):
+#     email_template_name = 'registration/password_reset_email.html'
+#     # subject_template_name = 'classroom/password_reset_subject.txt'
+#     success_url = reverse_lazy('home')  
+
+#     def form_valid(self, form):
+#         messages.success(self.request, f"Email has been sent to {form.cleaned_data['email']}")
+#         return super().form_valid(form)
+
+#     def form_invalid(self, form):
+#         messages.error(self.request, "Invalid email address")
+#         return super().form_invalid(form)
+
+        
+def password_reset(request):
+    print('ok')
+    
+    if request.method == 'POST':
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            # Retrieve the email from the form's cleaned data
+            email = form.cleaned_data['email']
+            print(email)
+
+            try:
+                # Your additional logic with the email (e.g., sending reset email)
+                form.save(
+                    request=request,
+                    use_https=request.is_secure(),
+                    from_email=None,
+                    email_template_name='registration/password_reset_email.html',
+                    subject_template_name='registration/password_reset_subject.txt',
+                )
+                messages.success(request, f"Email has been sent to {email}")
+                return render(request, 'registration/password_reset_done.html', {'form': form})
+            except Exception as e:
+                print(f"Error sending reset email: {e}")
+                messages.error(request, "Error sending reset email. Please try again.")
+                return render(request, 'registration/password_reset_form.html', {'form': form})
+        else:
+            messages.error(request, "Invalid form submission. Please check your input.")
+            return render(request, 'registration/password_reset_form.html', {'form': form})
+    else:
+        form = PasswordResetForm()
+    return render(request, 'registration/password_reset_form.html', {'form': form})
 
 
 def index(request):

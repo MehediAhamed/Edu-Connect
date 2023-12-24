@@ -1,6 +1,7 @@
 from django.urls import path
 from classroom import views
 from classroom import  models
+from django.contrib.auth import views as auth_views
 
 app_name = 'classroom'
 
@@ -60,6 +61,23 @@ path('student/<int:pk>/enter_marks/<str:subject>/<int:assignment_id>/', views.ad
     path('submit_list/',views.submit_list,name="submit_list"),
     
     path('change_password/',views.change_password,name="change_password"),
+    # path('password_reset/',views.password_reset,name="password_reset"),
+    
+    path('password_reset/',auth_views.PasswordResetView.as_view(),name='password_reset'),
+    # path('password_reset/',views.CustomPasswordResetView.as_view(),name='password_reset'),
+
+     
+    # path('password_reset/',views.password_reset,name='password_reset'),
+    
+    path('password_reset/done/',auth_views.PasswordResetDoneView.as_view(),name='password_reset_done'),
+
+    path('reset/<uidb64>/<token>/',auth_views.PasswordResetConfirmView.as_view(),name='password_reset_confirm'),
+
+    path('reset/done/',auth_views.PasswordResetCompleteView.as_view(),name='password_reset_complete'),
+    
+    
+    
+    
     path('video_meet/', views.video_meet_view, name='video_meet'),
     path('reply_to_message/',views.reply_to_message, name='reply_to_message'),
     path('meeting_schedule_list_teacher/<int:pk>/', views.meeting_schedule_list_teacher, name='meeting_schedule_list_teacher'),
